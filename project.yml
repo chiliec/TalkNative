@@ -1,0 +1,90 @@
+name: TalkNative
+options:
+  deploymentTarget:
+    iOS: "26.0"
+  bundleIdPrefix: com.axveer
+  groupOrdering:
+    - order: [TalkNative, EnhanceExtension, Packages, docs, scripts]
+
+settings:
+  base:
+    SWIFT_VERSION: 6.0
+    CODE_SIGN_STYLE: Automatic
+
+packages:
+  EnhancerCore: { path: Packages/EnhancerCore }
+  PresetKit:    { path: Packages/PresetKit }
+  HistoryKit:   { path: Packages/HistoryKit }
+  EnhancerUI:   { path: Packages/EnhancerUI }
+
+targets:
+  TalkNative:
+    type: application
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources: [TalkNative]
+    info:
+      path: TalkNative/Info.plist
+      properties:
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+    entitlements:
+      path: TalkNative/TalkNative.entitlements
+    dependencies:
+      - target: EnhanceExtension
+        embed: true
+      - package: EnhancerCore
+      - package: PresetKit
+      - package: HistoryKit
+      - package: EnhancerUI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.axveer.talknative
+        TARGETED_DEVICE_FAMILY: "1,2"
+
+  EnhanceExtension:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources: [EnhanceExtension]
+    info:
+      path: EnhanceExtension/Info.plist
+      properties:
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.share-services
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
+          NSExtensionAttributes:
+            NSExtensionActivationRule:
+              NSExtensionActivationSupportsText: true
+    entitlements:
+      path: EnhanceExtension/EnhanceExtension.entitlements
+    dependencies:
+      - package: EnhancerCore
+      - package: PresetKit
+      - package: HistoryKit
+      - package: EnhancerUI
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.axveer.talknative.extension
+
+  TalkNativeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [TalkNativeTests]
+    dependencies:
+      - target: TalkNative
+
+  TalkNativeUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources: [TalkNativeUITests]
+    dependencies:
+      - target: TalkNative
+
+  DeviceSmokeTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [DeviceSmokeTests]
+    dependencies:
+      - package: EnhancerCore
