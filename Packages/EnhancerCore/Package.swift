@@ -3,7 +3,7 @@ import PackageDescription
 
 let package = Package(
     name: "EnhancerCore",
-    platforms: [.iOS(.v26)],
+    platforms: [.iOS(.v26), .macOS(.v26)],
     products: [
         .library(name: "EnhancerCore", targets: ["EnhancerCore"])
     ],
