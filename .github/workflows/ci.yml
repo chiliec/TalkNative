@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  packages:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+      - name: Test EnhancerCore
+        run: swift test --package-path Packages/EnhancerCore
+      - name: Test PresetKit
+        run: swift test --package-path Packages/PresetKit
+      - name: Test HistoryKit
+        run: swift test --package-path Packages/HistoryKit
+      - name: Test EnhancerUI
+        run: swift test --package-path Packages/EnhancerUI
+
+  lint:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install swift-format
+        run: brew install swift-format
+      - name: Lint
+        run: ./scripts/lint.sh
+
+  no-network:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: No-network guard
+        run: ./scripts/no-network-check.sh
