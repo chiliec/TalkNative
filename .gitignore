@@ -1,0 +1,25 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcuserstate
+*.xcuserdatad/
+xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved
+
+# XcodeGen-generated
+TalkNative.xcodeproj/
+
+# Superpowers runtime (brainstorm sessions, do not commit)
+.superpowers/
+
+# CI
+.env
