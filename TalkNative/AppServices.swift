@@ -38,3 +38,16 @@ final class AppServices {
         return AppServices(presetStore: presetStore, historyStore: historyStore, enhancer: enhancer, provider: provider)
     }
 }
+
+extension AppServices {
+    static func makeStubbed() -> AppServices {
+        let defaults = UserDefaults(suiteName: "ui-test.\(UUID().uuidString)")!
+        let presetStore = PresetStore(defaults: defaults)
+        presetStore.seedIfNeeded()
+        let container = (try? HistorySchema.makeContainer(appGroupURL: nil))!
+        let historyStore = HistoryStore(container: container)
+        let provider = StubLanguageModelProvider(scriptedChunks: ["Hi ", "there"])
+        let enhancer = Enhancer(provider: provider)
+        return AppServices(presetStore: presetStore, historyStore: historyStore, enhancer: enhancer, provider: provider)
+    }
+}
