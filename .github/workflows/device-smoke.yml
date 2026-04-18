@@ -5,13 +5,17 @@ on:
     - cron: "0 6 * * *"  # daily at 06:00 UTC
   workflow_dispatch:
 
+env:
+  XCODE_APP: /Applications/Xcode_26.4.app
+  IOS_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4
+
 jobs:
   smoke:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.app
+        run: sudo xcode-select -s "$XCODE_APP"
       - name: Install xcodegen
         run: brew install xcodegen
       - name: Generate project
@@ -21,4 +25,5 @@ jobs:
           xcodebuild test \
             -project TalkNative.xcodeproj \
             -scheme DeviceSmokeTests \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=26.0'
+            -destination "$IOS_DESTINATION" \
+            CODE_SIGNING_ALLOWED=NO

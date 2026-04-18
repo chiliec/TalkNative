@@ -5,13 +5,17 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  XCODE_APP: /Applications/Xcode_26.4.app
+  IOS_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4
+
 jobs:
   packages:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_16.app
+        run: sudo xcode-select -s "$XCODE_APP"
       - name: Test EnhancerCore
         run: swift test --package-path Packages/EnhancerCore
       - name: Test PresetKit
@@ -21,8 +25,42 @@ jobs:
       - name: Test EnhancerUI
         run: swift test --package-path Packages/EnhancerUI
 
+  xcode:
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s "$XCODE_APP"
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Build app
+        run: |
+          xcodebuild build \
+            -project TalkNative.xcodeproj \
+            -scheme TalkNative \
+            -destination "$IOS_DESTINATION" \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Run TalkNativeTests
+        run: |
+          xcodebuild test \
+            -project TalkNative.xcodeproj \
+            -scheme TalkNative \
+            -destination "$IOS_DESTINATION" \
+            -only-testing:TalkNativeTests \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Run TalkNativeUITests
+        run: |
+          xcodebuild test \
+            -project TalkNative.xcodeproj \
+            -scheme TalkNative \
+            -destination "$IOS_DESTINATION" \
+            -only-testing:TalkNativeUITests \
+            CODE_SIGNING_ALLOWED=NO
+
   lint:
-    runs-on: macos-15
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v4
       - name: Install swift-format
