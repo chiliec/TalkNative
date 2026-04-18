@@ -1,0 +1,24 @@
+name: Device Smoke
+
+on:
+  schedule:
+    - cron: "0 6 * * *"  # daily at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.app
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Generate project
+        run: xcodegen generate
+      - name: Run DeviceSmokeTests
+        run: |
+          xcodebuild test \
+            -project TalkNative.xcodeproj \
+            -scheme DeviceSmokeTests \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro,OS=26.0'
