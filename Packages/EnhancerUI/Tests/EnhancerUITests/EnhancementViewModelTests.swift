@@ -27,6 +27,36 @@ struct EnhancementViewModelTests {
         #expect(vm.variantStates.allSatisfy { $0.text == "Hi" })
     }
 
+    @Test func regenerateWithUnknownPresetIDIsNoOp() async {
+        let provider = StubLanguageModelProvider(scriptedChunks: ["Hi"])
+        let enhancer = Enhancer(provider: provider)
+        let vm = EnhancementViewModel(enhancer: enhancer)
+        await vm.start(inputText: "hey", activePresets: presets())
+        await vm.waitForCompletion()
+        let snapshot = vm.variantStates
+
+        await vm.regenerate(presetID: UUID(), activePresets: presets())
+
+        #expect(vm.variantStates == snapshot)
+    }
+
+    @Test func waitForCompletionReturnsImmediatelyWhenNotRunning() async {
+        let provider = StubLanguageModelProvider(scriptedChunks: ["Hi"])
+        let enhancer = Enhancer(provider: provider)
+        let vm = EnhancementViewModel(enhancer: enhancer)
+        await vm.waitForCompletion()
+        #expect(vm.isRunning == false)
+    }
+
+    @Test func cancelWithoutStartIsSafe() {
+        let provider = StubLanguageModelProvider(scriptedChunks: ["Hi"])
+        let enhancer = Enhancer(provider: provider)
+        let vm = EnhancementViewModel(enhancer: enhancer)
+        vm.cancel()
+        #expect(vm.isRunning == false)
+        #expect(vm.variantStates.isEmpty)
+    }
+
     @Test func cancelStopsFurtherEvents() async {
         let provider = StubLanguageModelProvider(
             scriptedChunks: Array(repeating: "x", count: 50),

@@ -63,6 +63,42 @@ struct EnhancerTests {
         #expect(failures == 3)
     }
 
+    @Test func streamFinishesImmediatelyForEmptyVariants() async {
+        let provider = StubLanguageModelProvider(scriptedChunks: ["Hi"])
+        let enhancer = Enhancer(provider: provider)
+        let request = EnhancementRequest(inputText: "hey", variants: [])
+
+        var count = 0
+        for await _ in enhancer.enhance(request) { count += 1 }
+        #expect(count == 0)
+    }
+
+    @Test func emptyScriptedChunksStillEmitsStartedAndCompletedWithEmptyText() async {
+        let presetID = UUID()
+        let provider = StubLanguageModelProvider(scriptedChunks: [])
+        let enhancer = Enhancer(provider: provider)
+        let request = EnhancementRequest(
+            inputText: "hey",
+            variants: [VariantRequest(presetID: presetID, presetLabel: "A", presetInstructions: "ia")]
+        )
+
+        var events: [VariantChunk] = []
+        for await event in enhancer.enhance(request) { events.append(event) }
+
+        #expect(events.count == 2)
+        if case .started(let pid) = events.first {
+            #expect(pid == presetID)
+        } else {
+            Issue.record("expected .started first")
+        }
+        if case .completed(let pid, let text) = events.last {
+            #expect(pid == presetID)
+            #expect(text == "")
+        } else {
+            Issue.record("expected .completed last with empty text")
+        }
+    }
+
     @Test func cancellationStopsMidStream() async throws {
         let provider = StubLanguageModelProvider(
             scriptedChunks: Array(repeating: "x", count: 100),

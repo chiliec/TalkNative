@@ -70,6 +70,56 @@ struct PresetStoreTests {
         }
     }
 
+    @Test func deletingActiveCustomRefillsFromBuiltIns() throws {
+        let (store, _) = makeStore()
+        store.seedIfNeeded()
+        let custom = try store.addCustom(label: "Startup", instructions: "no buzzwords")
+        let builtIns = store.allPresets.filter(\.isBuiltIn)
+        try store.setActive(presetIDs: [builtIns[0].id, builtIns[1].id, custom.id])
+        #expect(store.activePresets.contains { $0.id == custom.id })
+
+        try store.deleteCustom(id: custom.id)
+
+        #expect(store.activePresets.count == 3)
+        #expect(store.activePresets.allSatisfy { $0.isBuiltIn })
+        #expect(!store.activePresets.contains { $0.id == custom.id })
+    }
+
+    @Test func setActiveRejectsUnknownID() {
+        let (store, _) = makeStore()
+        store.seedIfNeeded()
+        let known = Array(store.allPresets.prefix(2).map(\.id))
+        #expect(throws: PresetStore.Error.notFound) {
+            try store.setActive(presetIDs: known + [UUID()])
+        }
+    }
+
+    @Test func updateCustomOnBuiltInRejected() {
+        let (store, _) = makeStore()
+        store.seedIfNeeded()
+        let builtIn = store.allPresets.first(where: \.isBuiltIn)!
+        #expect(throws: PresetStore.Error.cannotDeleteBuiltIn) {
+            try store.updateCustom(id: builtIn.id, label: "Override", instructions: "x")
+        }
+    }
+
+    @Test func labelAtMaxLengthAccepted() throws {
+        let (store, _) = makeStore()
+        store.seedIfNeeded()
+        let maxLabel = String(repeating: "a", count: PresetValidation.labelMax)
+        _ = try store.addCustom(label: maxLabel, instructions: "x")
+        #expect(store.allPresets.contains { $0.label == maxLabel })
+    }
+
+    @Test func labelOverMaxLengthRejected() {
+        let (store, _) = makeStore()
+        store.seedIfNeeded()
+        let tooLong = String(repeating: "a", count: PresetValidation.labelMax + 1)
+        #expect(throws: PresetValidation.Error.labelTooLong) {
+            _ = try store.addCustom(label: tooLong, instructions: "x")
+        }
+    }
+
     @Test func setActivePersists() throws {
         let (store, defaults) = makeStore()
         store.seedIfNeeded()
