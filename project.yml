@@ -88,3 +88,6 @@ targets:
     sources: [DeviceSmokeTests]
     dependencies:
       - package: EnhancerCore
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: "YES"
