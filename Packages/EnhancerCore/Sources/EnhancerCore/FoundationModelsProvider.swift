@@ -27,7 +27,7 @@ public struct FoundationModelsProvider: LanguageModelProvider {
                 do {
                     let session = LanguageModelSession(
                         model: SystemLanguageModel.default,
-                        instructions: Instructions { instructions }
+                        instructions: instructions
                     )
                     let responseStream = session.streamResponse(to: prompt)
                     var lastSnapshot = ""
@@ -53,7 +53,7 @@ public struct FoundationModelsProvider: LanguageModelProvider {
     }
 
     #if canImport(FoundationModels)
-    private static func mapReason(_ reason: SystemLanguageModel.UnavailableReason) -> LanguageModelAvailability.Reason {
+    private static func mapReason(_ reason: SystemLanguageModel.Availability.UnavailableReason) -> LanguageModelAvailability.Reason {
         switch reason {
         case .deviceNotEligible: return .deviceNotEligible
         case .appleIntelligenceNotEnabled: return .appleIntelligenceNotEnabled
@@ -66,7 +66,7 @@ public struct FoundationModelsProvider: LanguageModelProvider {
         switch error {
         case .guardrailViolation: return .guardrailViolation
         case .rateLimited: return .rateLimited
-        case .exceededContextWindow: return .exceededContextWindow
+        case .exceededContextWindowSize: return .exceededContextWindow
         default: return .unknown(error)
         }
     }
