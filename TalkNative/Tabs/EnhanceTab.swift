@@ -5,16 +5,21 @@ import EnhancerUI
 import HistoryKit
 import PresetKit
 
+struct EnhanceSession: Identifiable {
+    let id = UUID()
+    let viewModel: EnhancementViewModel
+}
+
 struct EnhanceTab: View {
     @Environment(AppServices.self) private var services
-    @State private var input: String = ""
-    @State private var showResult: Bool = false
-    @State private var viewModel: EnhancementViewModel?
+    @State private var input: String = LaunchArguments.prefilledInput ?? ""
+    @State private var session: EnhanceSession?
 
     var body: some View {
         NavigationStack {
             VStack(alignment: .leading, spacing: 16) {
                 TextEditorBox(text: $input, maxChars: 2000)
+                    .accessibilityIdentifier("EnhanceInput")
 
                 HStack(spacing: 6) {
                     ForEach(services.presetStore.activePresets) { p in
@@ -33,21 +38,20 @@ struct EnhanceTab: View {
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
                 .disabled(!canEnhance)
+                .accessibilityIdentifier("EnhanceButton")
 
                 Spacer()
             }
             .padding()
             .navigationTitle("TalkNative")
-            .sheet(isPresented: $showResult, onDismiss: { viewModel = nil }) {
-                if let vm = viewModel {
-                    ResultSheet(
-                        viewModel: vm,
-                        presets: services.presetStore.activePresets,
-                        onCopy: { UIPasteboard.general.string = $0 },
-                        onDismiss: { showResult = false }
-                    )
-                    .task { await recordOnCompletion(vm: vm) }
-                }
+            .sheet(item: $session) { session in
+                ResultSheet(
+                    viewModel: session.viewModel,
+                    presets: services.presetStore.activePresets,
+                    onCopy: { UIPasteboard.general.string = $0 },
+                    onDismiss: { self.session = nil }
+                )
+                .task { await recordOnCompletion(vm: session.viewModel) }
             }
         }
     }
@@ -59,8 +63,7 @@ struct EnhanceTab: View {
 
     private func enhance() {
         let vm = EnhancementViewModel(enhancer: services.enhancer)
-        viewModel = vm
-        showResult = true
+        session = EnhanceSession(viewModel: vm)
         Task {
             await vm.start(inputText: input, activePresets: services.presetStore.activePresets)
         }
