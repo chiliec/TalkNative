@@ -22,8 +22,10 @@ struct SettingsTab: View {
                 }
             }
             .navigationTitle("Settings")
-            .confirmationDialog("Delete all enhancement history?",
-                                isPresented: $confirmClear, titleVisibility: .visible) {
+            .confirmationDialog(
+                "Delete all enhancement history?",
+                isPresented: $confirmClear, titleVisibility: .visible
+            ) {
                 Button("Clear history", role: .destructive) {
                     try? services.historyStore.clear()
                 }
@@ -41,7 +43,11 @@ private struct CustomPresetsListView: View {
         List {
             Section("Custom") {
                 ForEach(services.presetStore.allPresets.filter { !$0.isBuiltIn }) { p in
-                    Button { editing = p; showEditor = true } label: { Text(p.label) }
+                    Button {
+                        editing = p; showEditor = true
+                    } label: {
+                        Text(p.label)
+                    }
                 }
                 .onDelete { offsets in
                     let customs = services.presetStore.allPresets.filter { !$0.isBuiltIn }

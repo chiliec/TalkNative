@@ -18,8 +18,10 @@ public struct PresetChip: View {
                 .font(.caption)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 5)
-                .background(isActive ? Color.accentColor : Color.secondary.opacity(0.2),
-                            in: Capsule())
+                .background(
+                    isActive ? Color.accentColor : Color.secondary.opacity(0.2),
+                    in: Capsule()
+                )
                 .foregroundStyle(isActive ? Color.white : Color.primary)
         }
         .buttonStyle(.plain)

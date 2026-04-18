@@ -9,7 +9,7 @@ struct FoundationModelsSmokeTests {
         "I would like to kindly request your attendance to the upcoming meeting",
         "it a funny situation but i dont know what to do with",
         "hit the nail on the head i think",
-        "ok"
+        "ok",
     ]
 
     @Test(.enabled(if: FoundationModelsSmokeTests.available()))
@@ -19,12 +19,15 @@ struct FoundationModelsSmokeTests {
 
         for text in inputs {
             let variants = [
-                VariantRequest(presetID: UUID(), presetLabel: "Casual",
-                               presetInstructions: "Everyday conversational language."),
-                VariantRequest(presetID: UUID(), presetLabel: "Professional",
-                               presetInstructions: "Business-appropriate, courteous."),
-                VariantRequest(presetID: UUID(), presetLabel: "Warm",
-                               presetInstructions: "Kind, considerate phrasing.")
+                VariantRequest(
+                    presetID: UUID(), presetLabel: "Casual",
+                    presetInstructions: "Everyday conversational language."),
+                VariantRequest(
+                    presetID: UUID(), presetLabel: "Professional",
+                    presetInstructions: "Business-appropriate, courteous."),
+                VariantRequest(
+                    presetID: UUID(), presetLabel: "Warm",
+                    presetInstructions: "Kind, considerate phrasing."),
             ]
             let request = EnhancementRequest(inputText: text, variants: variants)
 

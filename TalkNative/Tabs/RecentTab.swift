@@ -12,7 +12,9 @@ struct RecentTab: View {
         NavigationStack {
             List {
                 ForEach(items) { item in
-                    Button { selected = item } label: {
+                    Button {
+                        selected = item
+                    } label: {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(item.inputText)
                                 .lineLimit(2)
@@ -26,9 +28,10 @@ struct RecentTab: View {
             }
             .overlay {
                 if items.isEmpty {
-                    ContentUnavailableView("No recent enhancements",
-                                           systemImage: "clock",
-                                           description: Text("Enhanced messages appear here."))
+                    ContentUnavailableView(
+                        "No recent enhancements",
+                        systemImage: "clock",
+                        description: Text("Enhanced messages appear here."))
                 }
             }
             .navigationTitle("Recent")

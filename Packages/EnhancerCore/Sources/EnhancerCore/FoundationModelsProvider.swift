@@ -1,6 +1,6 @@
 import Foundation
 #if canImport(FoundationModels)
-import FoundationModels
+    import FoundationModels
 #endif
 
 public struct FoundationModelsProvider: LanguageModelProvider {
@@ -9,14 +9,14 @@ public struct FoundationModelsProvider: LanguageModelProvider {
 
     public var availability: LanguageModelAvailability {
         #if canImport(FoundationModels)
-        switch SystemLanguageModel.default.availability {
-        case .available:
-            return .available
-        case .unavailable(let reason):
-            return .unavailable(Self.mapReason(reason))
-        }
+            switch SystemLanguageModel.default.availability {
+            case .available:
+                return .available
+            case .unavailable(let reason):
+                return .unavailable(Self.mapReason(reason))
+            }
         #else
-        return .unavailable(.deviceNotEligible)
+            return .unavailable(.deviceNotEligible)
         #endif
     }
 
@@ -24,28 +24,28 @@ public struct FoundationModelsProvider: LanguageModelProvider {
         AsyncThrowingStream { continuation in
             let task = Task {
                 #if canImport(FoundationModels)
-                do {
-                    let session = LanguageModelSession(
-                        model: SystemLanguageModel.default,
-                        instructions: instructions
-                    )
-                    let responseStream = session.streamResponse(to: prompt)
-                    var lastSnapshot = ""
-                    for try await snapshot in responseStream {
-                        if Task.isCancelled { break }
-                        let full = snapshot.content
-                        let delta = String(full.dropFirst(lastSnapshot.count))
-                        lastSnapshot = full
-                        if !delta.isEmpty { continuation.yield(delta) }
+                    do {
+                        let session = LanguageModelSession(
+                            model: SystemLanguageModel.default,
+                            instructions: instructions
+                        )
+                        let responseStream = session.streamResponse(to: prompt)
+                        var lastSnapshot = ""
+                        for try await snapshot in responseStream {
+                            if Task.isCancelled { break }
+                            let full = snapshot.content
+                            let delta = String(full.dropFirst(lastSnapshot.count))
+                            lastSnapshot = full
+                            if !delta.isEmpty { continuation.yield(delta) }
+                        }
+                        continuation.finish()
+                    } catch let error as LanguageModelSession.GenerationError {
+                        continuation.finish(throwing: Self.mapError(error))
+                    } catch {
+                        continuation.finish(throwing: error)
                     }
-                    continuation.finish()
-                } catch let error as LanguageModelSession.GenerationError {
-                    continuation.finish(throwing: Self.mapError(error))
-                } catch {
-                    continuation.finish(throwing: error)
-                }
                 #else
-                continuation.finish(throwing: EnhancerError.modelUnavailable(.deviceNotEligible))
+                    continuation.finish(throwing: EnhancerError.modelUnavailable(.deviceNotEligible))
                 #endif
             }
             continuation.onTermination = { _ in task.cancel() }
@@ -53,22 +53,24 @@ public struct FoundationModelsProvider: LanguageModelProvider {
     }
 
     #if canImport(FoundationModels)
-    private static func mapReason(_ reason: SystemLanguageModel.Availability.UnavailableReason) -> LanguageModelAvailability.Reason {
-        switch reason {
-        case .deviceNotEligible: return .deviceNotEligible
-        case .appleIntelligenceNotEnabled: return .appleIntelligenceNotEnabled
-        case .modelNotReady: return .modelNotReady
-        @unknown default: return .other(String(describing: reason))
+        private static func mapReason(_ reason: SystemLanguageModel.Availability.UnavailableReason)
+            -> LanguageModelAvailability.Reason
+        {
+            switch reason {
+            case .deviceNotEligible: return .deviceNotEligible
+            case .appleIntelligenceNotEnabled: return .appleIntelligenceNotEnabled
+            case .modelNotReady: return .modelNotReady
+            @unknown default: return .other(String(describing: reason))
+            }
         }
-    }
 
-    private static func mapError(_ error: LanguageModelSession.GenerationError) -> EnhancerError {
-        switch error {
-        case .guardrailViolation: return .guardrailViolation
-        case .rateLimited: return .rateLimited
-        case .exceededContextWindowSize: return .exceededContextWindow
-        default: return .unknown(error)
+        private static func mapError(_ error: LanguageModelSession.GenerationError) -> EnhancerError {
+            switch error {
+            case .guardrailViolation: return .guardrailViolation
+            case .rateLimited: return .rateLimited
+            case .exceededContextWindowSize: return .exceededContextWindow
+            default: return .unknown(error)
+            }
         }
-    }
     #endif
 }

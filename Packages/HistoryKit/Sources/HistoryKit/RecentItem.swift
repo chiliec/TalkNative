@@ -18,10 +18,12 @@ public final class RecentItem {
     @Attribute(.unique) public var id: UUID
     public var createdAt: Date
     public var inputText: String
-    public var variantsData: Data   // JSON-encoded [SavedVariant]
+    public var variantsData: Data  // JSON-encoded [SavedVariant]
     public var deviceModelName: String
 
-    public init(id: UUID = UUID(), createdAt: Date = .now, inputText: String, variants: [SavedVariant], deviceModelName: String) {
+    public init(
+        id: UUID = UUID(), createdAt: Date = .now, inputText: String, variants: [SavedVariant], deviceModelName: String
+    ) {
         self.id = id
         self.createdAt = createdAt
         self.inputText = inputText

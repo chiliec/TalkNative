@@ -10,7 +10,8 @@ final class ShareViewController: UIViewController {
 
     private func loadText() async {
         guard let item = extensionContext?.inputItems.first as? NSExtensionItem,
-              let provider = item.attachments?.first else {
+            let provider = item.attachments?.first
+        else {
             complete(with: nil); return
         }
 

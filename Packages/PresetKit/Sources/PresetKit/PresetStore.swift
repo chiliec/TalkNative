@@ -91,13 +91,15 @@ public final class PresetStore {
     private func load() {
         let decoder = JSONDecoder()
         if let data = defaults.data(forKey: Keys.presets),
-           let decoded = try? decoder.decode([Preset].self, from: data) {
+            let decoded = try? decoder.decode([Preset].self, from: data)
+        {
             allPresets = decoded.sorted(by: { $0.sortOrder < $1.sortOrder })
         } else {
             allPresets = []
         }
         if let selData = defaults.data(forKey: Keys.selection),
-           let sel = try? decoder.decode(PresetSelection.self, from: selData) {
+            let sel = try? decoder.decode(PresetSelection.self, from: selData)
+        {
             activePresets = sel.activePresetIDs.compactMap { id in allPresets.first(where: { $0.id == id }) }
         } else {
             activePresets = []

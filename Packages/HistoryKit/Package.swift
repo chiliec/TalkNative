@@ -7,6 +7,6 @@ let package = Package(
     products: [.library(name: "HistoryKit", targets: ["HistoryKit"])],
     targets: [
         .target(name: "HistoryKit"),
-        .testTarget(name: "HistoryKitTests", dependencies: ["HistoryKit"])
+        .testTarget(name: "HistoryKitTests", dependencies: ["HistoryKit"]),
     ]
 )

@@ -7,6 +7,6 @@ let package = Package(
     products: [.library(name: "PresetKit", targets: ["PresetKit"])],
     targets: [
         .target(name: "PresetKit"),
-        .testTarget(name: "PresetKitTests", dependencies: ["PresetKit"])
+        .testTarget(name: "PresetKitTests", dependencies: ["PresetKit"]),
     ]
 )

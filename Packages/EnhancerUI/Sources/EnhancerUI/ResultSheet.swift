@@ -47,11 +47,13 @@ public struct ResultSheet: View {
             }
             .navigationTitle("Enhanced")
             #if os(iOS)
-            .navigationBarTitleDisplayMode(.inline)
+                .navigationBarTitleDisplayMode(.inline)
             #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Done") { viewModel.cancel(); onDismiss() }
+                    Button("Done") {
+                        viewModel.cancel(); onDismiss()
+                    }
                 }
             }
         }

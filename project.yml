@@ -31,6 +31,9 @@ targets:
           - UIInterfaceOrientationPortrait
     entitlements:
       path: TalkNative/TalkNative.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.axveer.talknative
     dependencies:
       - target: EnhanceExtension
         embed: true
@@ -60,6 +63,9 @@ targets:
               NSExtensionActivationSupportsText: true
     entitlements:
       path: EnhanceExtension/EnhanceExtension.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.axveer.talknative
     dependencies:
       - package: EnhancerCore
       - package: PresetKit

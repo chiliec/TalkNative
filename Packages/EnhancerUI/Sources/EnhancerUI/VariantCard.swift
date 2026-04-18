@@ -9,10 +9,12 @@ public struct VariantCard: View {
     public let onPrimary: () -> Void
     public let onRegenerate: () -> Void
 
-    public init(state: VariantViewState,
-                actionKind: ActionKind = .copy,
-                onPrimary: @escaping () -> Void,
-                onRegenerate: @escaping () -> Void) {
+    public init(
+        state: VariantViewState,
+        actionKind: ActionKind = .copy,
+        onPrimary: @escaping () -> Void,
+        onRegenerate: @escaping () -> Void
+    ) {
         self.state = state
         self.actionKind = actionKind
         self.onPrimary = onPrimary

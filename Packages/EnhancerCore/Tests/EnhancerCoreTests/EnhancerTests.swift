@@ -10,7 +10,7 @@ struct EnhancerTests {
             variants: [
                 VariantRequest(presetID: UUID(), presetLabel: "A", presetInstructions: "ia"),
                 VariantRequest(presetID: UUID(), presetLabel: "B", presetInstructions: "ib"),
-                VariantRequest(presetID: UUID(), presetLabel: "C", presetInstructions: "ic")
+                VariantRequest(presetID: UUID(), presetLabel: "C", presetInstructions: "ic"),
             ]
         )
     }
@@ -33,11 +33,15 @@ struct EnhancerTests {
             let base = index * expectedPerVariant
             if case .started(let pid) = events[base] {
                 #expect(pid == v.presetID)
-            } else { Issue.record("expected .started at \(base)") }
+            } else {
+                Issue.record("expected .started at \(base)")
+            }
             if case .completed(let pid, let text) = events[base + 3] {
                 #expect(pid == v.presetID)
                 #expect(text == "Hi there")
-            } else { Issue.record("expected .completed at \(base + 3)") }
+            } else {
+                Issue.record("expected .completed at \(base + 3)")
+            }
         }
     }
 

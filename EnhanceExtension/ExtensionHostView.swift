@@ -79,7 +79,8 @@ struct ExtensionServices {
         presets.seedIfNeeded()
 
         let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
-        let container = (try? HistorySchema.makeContainer(appGroupURL: containerURL))
+        let container =
+            (try? HistorySchema.makeContainer(appGroupURL: containerURL))
             ?? (try! HistorySchema.makeContainer(appGroupURL: nil))
         let history = HistoryStore(container: container)
 

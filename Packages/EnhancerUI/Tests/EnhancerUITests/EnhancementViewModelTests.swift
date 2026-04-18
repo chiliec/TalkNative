@@ -38,7 +38,8 @@ struct EnhancementViewModelTests {
         try? await Task.sleep(for: .milliseconds(40))
         vm.cancel()
         await vm.waitForCompletion()
-        #expect(vm.variantStates.contains(where: { $0.phase == .streaming || $0.phase == .waiting }) == false
-               || vm.variantStates.count == 3)
+        #expect(
+            vm.variantStates.contains(where: { $0.phase == .streaming || $0.phase == .waiting }) == false
+                || vm.variantStates.count == 3)
     }
 }

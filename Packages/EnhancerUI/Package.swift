@@ -7,13 +7,15 @@ let package = Package(
     products: [.library(name: "EnhancerUI", targets: ["EnhancerUI"])],
     dependencies: [
         .package(path: "../EnhancerCore"),
-        .package(path: "../PresetKit")
+        .package(path: "../PresetKit"),
     ],
     targets: [
-        .target(name: "EnhancerUI", dependencies: [
-            .product(name: "EnhancerCore", package: "EnhancerCore"),
-            .product(name: "PresetKit", package: "PresetKit")
-        ]),
-        .testTarget(name: "EnhancerUITests", dependencies: ["EnhancerUI"])
+        .target(
+            name: "EnhancerUI",
+            dependencies: [
+                .product(name: "EnhancerCore", package: "EnhancerCore"),
+                .product(name: "PresetKit", package: "PresetKit"),
+            ]),
+        .testTarget(name: "EnhancerUITests", dependencies: ["EnhancerUI"]),
     ]
 )

@@ -15,7 +15,7 @@ struct HistoryStoreTests {
         [
             SavedVariant(presetID: UUID(), presetLabelSnapshot: "A", outputText: "a"),
             SavedVariant(presetID: UUID(), presetLabelSnapshot: "B", outputText: "b"),
-            SavedVariant(presetID: UUID(), presetLabelSnapshot: "C", outputText: "c")
+            SavedVariant(presetID: UUID(), presetLabelSnapshot: "C", outputText: "c"),
         ]
     }
 

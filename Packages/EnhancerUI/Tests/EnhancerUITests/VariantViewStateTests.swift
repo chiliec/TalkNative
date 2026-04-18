@@ -27,7 +27,10 @@ struct VariantViewStateTests {
     @Test func failedSetsErrorPhase() {
         var state = VariantViewState(presetID: UUID(), presetLabel: "A")
         state.apply(.failed(presetID: state.presetID, error: .guardrailViolation))
-        if case .failed(let e) = state.phase { #expect(e == .guardrailViolation) }
-        else { Issue.record("expected .failed phase") }
+        if case .failed(let e) = state.phase {
+            #expect(e == .guardrailViolation)
+        } else {
+            Issue.record("expected .failed phase")
+        }
     }
 }

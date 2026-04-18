@@ -13,7 +13,8 @@ final class AppServices {
     let enhancer: Enhancer
     let provider: any LanguageModelProvider
 
-    init(presetStore: PresetStore, historyStore: HistoryStore, enhancer: Enhancer, provider: any LanguageModelProvider) {
+    init(presetStore: PresetStore, historyStore: HistoryStore, enhancer: Enhancer, provider: any LanguageModelProvider)
+    {
         self.presetStore = presetStore
         self.historyStore = historyStore
         self.enhancer = enhancer

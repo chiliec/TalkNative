@@ -32,8 +32,7 @@ public struct StubLanguageModelProvider: LanguageModelProvider {
                     if delay > .zero { try? await Task.sleep(for: delay) }
                     continuation.yield(chunk)
                 }
-                if let error { continuation.finish(throwing: error) }
-                else { continuation.finish() }
+                if let error { continuation.finish(throwing: error) } else { continuation.finish() }
             }
             continuation.onTermination = { _ in task.cancel() }
         }

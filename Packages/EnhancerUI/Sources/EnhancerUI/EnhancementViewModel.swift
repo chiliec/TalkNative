@@ -53,7 +53,9 @@ public final class EnhancementViewModel {
         }
         let request = EnhancementRequest(
             inputText: inputText,
-            variants: [VariantRequest(presetID: preset.id, presetLabel: preset.label, presetInstructions: preset.instructions)]
+            variants: [
+                VariantRequest(presetID: preset.id, presetLabel: preset.label, presetInstructions: preset.instructions)
+            ]
         )
         for await event in enhancer.enhance(request) {
             apply(event)
