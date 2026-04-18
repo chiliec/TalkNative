@@ -51,6 +51,7 @@ targets:
     info:
       path: EnhanceExtension/Info.plist
       properties:
+        CFBundleDisplayName: TalkNative
         NSExtension:
           NSExtensionPointIdentifier: com.apple.share-services
           NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShareViewController
@@ -74,6 +75,10 @@ targets:
     sources: [TalkNativeTests]
     dependencies:
       - target: TalkNative
+      - package: EnhancerCore
+      - package: PresetKit
+      - package: HistoryKit
+      - package: EnhancerUI
 
   TalkNativeUITests:
     type: bundle.ui-testing
