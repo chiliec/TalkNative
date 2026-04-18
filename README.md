@@ -22,4 +22,8 @@ swift test --package-path Packages/HistoryKit
 swift test --package-path Packages/EnhancerUI
 ```
 
+### Known v1 limitation
+
+The Action extension (in-place text replacement) is deferred to v1.1. The Share extension covers the primary invocation flow. See the spec section "Invocation surfaces" for intent.
+
 Design spec: `docs/superpowers/specs/2026-04-18-talknative-design.md`
