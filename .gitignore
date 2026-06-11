@@ -21,5 +21,8 @@ TalkNative.xcodeproj/
 # Superpowers runtime (brainstorm sessions, do not commit)
 .superpowers/
 
+# Claude Code local settings
+.claude/settings.local.json
+
 # CI
 .env
