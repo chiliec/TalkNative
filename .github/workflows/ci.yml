@@ -7,7 +7,7 @@ on:
 
 env:
   XCODE_APP: /Applications/Xcode_26.4.app
-  IOS_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4
+  IOS_DESTINATION: platform=iOS Simulator,name=iPhone 17 Pro,OS=26.4.1
 
 jobs:
   packages:
