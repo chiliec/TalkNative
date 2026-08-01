@@ -63,9 +63,11 @@ Four local Swift packages with a strict dependency DAG, shared by the app and th
 
 Full design spec: [`docs/superpowers/specs/2026-04-18-talknative-design.md`](docs/superpowers/specs/2026-04-18-talknative-design.md)
 
-## Known v1 limitation
+### Keyboard extension
 
-The Action extension (in-place text replacement) is deferred to v1.1. The Share extension covers the primary invocation flow — see the spec section "Invocation surfaces" for intent.
+In-place rewriting is delivered by a custom keyboard rather than an Action extension — iOS gives an Action extension no way to write back into the host app's text field. Enable it under Settings → General → Keyboard → Keyboards → TalkNative.
+
+The keyboard works immediately with the eight built-in presets. Granting **Allow Full Access** additionally makes your custom presets and Recents available to it; TalkNative has no network code at all, enforced in CI by `scripts/no-network-check.sh`.
 
 ## Roadmap
 

@@ -5,7 +5,7 @@
 
 ## Summary
 
-TalkNative is an iOS app that makes text sound more native for non-native English speakers. All enhancement happens on-device using Apple's Foundation Models framework — no network, no cloud, no accounts. Users invoke it three ways: as a standalone app, as a Share extension, and as an Action extension. Each enhancement returns three rewrites in parallel user-configurable tones.
+TalkNative is an iOS app that makes text sound more native for non-native English speakers. All enhancement happens on-device using Apple's Foundation Models framework — no network, no cloud, no accounts. Users invoke it three ways: as a standalone app, as a Share extension, and as a custom keyboard extension. Each enhancement returns three rewrites in parallel user-configurable tones.
 
 ## Target users
 
@@ -26,7 +26,9 @@ Given a string of English text, produce three alternative rewrites — one per a
 
 1. **Standalone app.** Home tab with a textbox, preset chips, and an Enhance button. Opens the Result sheet.
 2. **Share extension** (`EnhanceExtension` target, Share activation rule). User selects text in any app, taps Share → TalkNative. Result sheet shows variants; Copy is the terminal action.
-3. **Action extension** (same target, Action activation rule). User selects text, taps "…" in the text menu → TalkNative. Result sheet shows variants; tapping one replaces the selected text in place via `NSExtensionContext.completeRequest`.
+3. **Custom keyboard extension.** User selects text (or relies on what they just typed), switches to the TalkNative keyboard with the globe key, and taps a variant to replace the text in place via `UITextDocumentProxy`.
+
+   > **Correction (2026-08-01):** this surface was originally specified as an Action extension replacing text via `NSExtensionContext.completeRequest`. That does not work — a returned `NSExtensionItem` is honoured only by hosts that implement `completionWithItemsHandler` on `UIActivityViewController`, which effectively no app does. See `2026-08-01-keyboard-extension-design.md`.
 
 ## Architecture
 
@@ -69,7 +71,7 @@ When the user taps "Enhance":
 3. **Open the Result sheet** with three placeholder cards, one per active preset. Cards 2 and 3 show "Waiting…" until their turn starts.
 4. **Sequential streaming.** The `Enhancer` actor runs three streaming generations, one per active preset, in order. Each generation uses a fresh `LanguageModelSession` (no context accumulation between enhancements). As tokens arrive, they fill the corresponding card's text.
 5. **Completion.** Each card becomes actionable (Copy, Regenerate). When all three finish, `HistoryStore` records a `RecentItem` with input, the three outputs, preset IDs, and a label snapshot per preset.
-6. **User action.** Copy sets `UIPasteboard.general.string`. In the Action extension, tapping a variant calls `completeRequest(returningItems:)` for in-place replacement.
+6. **User action.** Copy sets `UIPasteboard.general.string`. In the keyboard extension, tapping a variant issues `deleteBackward()` and `insertText(_:)` on the host's `UITextDocumentProxy` for in-place replacement, with a one-tap undo.
 
 ### Prompt shape (`EnhancerCore/Prompts.swift`)
 

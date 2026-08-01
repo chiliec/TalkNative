@@ -48,6 +48,8 @@ Four local SPM packages with a strict dependency DAG, consumed by two targets (a
 - **PresetKit** — `Preset` model, 8 built-ins, `PresetStore` (UserDefaults-backed) with custom-preset CRUD. No dependencies.
 - **HistoryKit** — `RecentItem` SwiftData `@Model`, `HistoryStore` with a 50-item cap. Depends only on SwiftData.
 - **EnhancerUI** — shared SwiftUI components (`ResultSheet`, `VariantCard`, `PresetPicker`, `EnhancementViewModel`). Depends on EnhancerCore + PresetKit.
+- **TextReplacement** — leaf package holding `TextDocumentProxying`, the selection-first capture policy, and all replace/undo delete-count arithmetic. No dependencies, no UIKit; tests run on macOS. Delete counts are grapheme-cluster counts, never `utf16.count`.
+- **KeyboardUI** — `KeyboardPanelState`, `KeyboardPanelViewModel`, and keyboard-density views. Depends on EnhancerCore + PresetKit + EnhancerUI + TextReplacement. Never imports UIKit.
 
 Key seams to know:
 
@@ -56,9 +58,10 @@ Key seams to know:
 - **`AppServices`** (TalkNative target) is the composition root: `makeProduction()` wires real stores + `FoundationModelsProvider`; `makeStubbed()` wires `StubLanguageModelProvider` for UI tests.
 - **App Group** `group.com.axveer.talknative` (see `AppGroup.swift`): `PresetStore` defaults and the SwiftData container both live in the group so the app and the Share extension share state.
 - **UI-test hooks** (`LaunchArguments.swift`): launch arg `-useStubEnhancer` swaps in the stub provider; env var `TALKNATIVE_PREFILL_INPUT` prefills the input box.
+- **`TalkNativeKeyboard`** — custom keyboard extension (`com.apple.keyboard-service`). Holds only `KeyboardInputViewController`, `LiveTextDocumentProxy`, and `KeyboardServices`. Works without Full Access using built-in presets; Full Access unlocks App Group presets and history.
 
 ## Constraints
 
 - **Zero network calls.** Enforced by `scripts/no-network-check.sh` in CI over `Packages`, `TalkNative`, and `EnhanceExtension`. (The cloud-fallback spec will narrow this guard when implemented — until then, do not introduce networking APIs.)
 - No accounts, no telemetry; user data never leaves the device.
-- The Action extension (in-place text replacement) is deferred to v1.1; only the Share extension ships in v1.
+- In-place text replacement ships as a **custom keyboard extension**, not an Action extension. An Action extension cannot write back into a host app's text field on iOS — see `docs/superpowers/specs/2026-08-01-keyboard-extension-design.md`.
