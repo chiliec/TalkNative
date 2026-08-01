@@ -70,7 +70,10 @@ final class EnhanceFlowUITests: XCTestCase {
     func testUnsupportedDeviceCopyDoesNotRenderWhenStubEnabled() {
         let app = launch()
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
-        XCTAssertFalse(app.staticTexts["Apple Intelligence required"].exists)
+        // Asserted against the view's own identifier, not a copy string: this
+        // used to look for "Apple Intelligence required", which the view never
+        // renders, so it passed even if the unsupported screen had appeared.
+        XCTAssertFalse(app.otherElements["unsupportedDevice"].exists)
     }
 
     func testResultSheetDoneButtonDismisses() {
