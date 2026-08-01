@@ -81,6 +81,7 @@ public struct KeyboardPanel: View {
                 .accessibilityIdentifier("keyboardPanel.undo")
         }
         .padding(.horizontal, 10)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("keyboardPanel.replacedConfirmation")
     }
 

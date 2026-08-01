@@ -45,6 +45,8 @@ targets:
       - package: PresetKit
       - package: HistoryKit
       - package: EnhancerUI
+      - package: KeyboardUI
+      - package: TextReplacement
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.axveer.talknative
