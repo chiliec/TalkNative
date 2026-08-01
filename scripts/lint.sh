@@ -7,4 +7,5 @@ if ! command -v swift-format &>/dev/null; then
 fi
 
 swift-format lint --recursive --strict \
-  Packages TalkNative EnhanceExtension TalkNativeTests TalkNativeUITests DeviceSmokeTests
+  Packages TalkNative EnhanceExtension TalkNativeKeyboard \
+  TalkNativeTests TalkNativeUITests DeviceSmokeTests

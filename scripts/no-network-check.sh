@@ -2,7 +2,7 @@
 set -euo pipefail
 
 FORBIDDEN='URLSession|\bNetwork\b|NWConnection|URLRequest|URLProtocol'
-TARGETS=(Packages TalkNative EnhanceExtension)
+TARGETS=(Packages TalkNative EnhanceExtension TalkNativeKeyboard)
 
 hits=$(grep -rnE "$FORBIDDEN" "${TARGETS[@]}" --include='*.swift' || true)
 if [[ -n "$hits" ]]; then

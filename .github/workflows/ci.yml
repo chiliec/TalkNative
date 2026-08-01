@@ -24,6 +24,10 @@ jobs:
         run: swift test --package-path Packages/HistoryKit
       - name: Test EnhancerUI
         run: swift test --package-path Packages/EnhancerUI
+      - name: Test TextReplacement
+        run: swift test --package-path Packages/TextReplacement
+      - name: Test KeyboardUI
+        run: swift test --package-path Packages/KeyboardUI
 
   xcode:
     runs-on: macos-26
