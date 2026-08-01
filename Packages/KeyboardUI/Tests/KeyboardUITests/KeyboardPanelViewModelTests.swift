@@ -24,7 +24,7 @@ struct KeyboardPanelViewModelTests {
         return KeyboardPanelViewModel(
             proxy: proxy,
             enhancement: EnhancementViewModel(enhancer: Enhancer(provider: provider)),
-            availability: availability,
+            availability: { availability },
             activePresets: makePresets(),
             hasFullAccess: hasFullAccess,
             maxChars: maxChars
@@ -36,6 +36,57 @@ struct KeyboardPanelViewModelTests {
         let vm = makeViewModel(proxy: proxy, availability: .unavailable(.deviceNotEligible))
         await vm.onAppear()
         #expect(vm.state == .unavailable(.deviceNotEligible))
+    }
+
+    /// A live availability source, so a test can move the model from
+    /// unavailable to available the way the system does at runtime.
+    private func makeViewModel(
+        proxy: StubTextDocumentProxy,
+        availabilitySource: @escaping @MainActor () -> LanguageModelAvailability
+    ) -> KeyboardPanelViewModel {
+        KeyboardPanelViewModel(
+            proxy: proxy,
+            enhancement: EnhancementViewModel(
+                enhancer: Enhancer(
+                    provider: StubLanguageModelProvider(scriptedChunks: ["polished text"]))),
+            availability: availabilitySource,
+            activePresets: makePresets(),
+            hasFullAccess: true
+        )
+    }
+
+    @Test func unavailablePanelRecoversWhenTheModelBecomesReady() async {
+        var current = LanguageModelAvailability.unavailable(.modelNotReady)
+        let proxy = StubTextDocumentProxy(before: "i has went to the store")
+        let vm = makeViewModel(proxy: proxy, availabilitySource: { current })
+
+        await vm.onAppear()
+        #expect(vm.state == .unavailable(.modelNotReady))
+
+        current = .available
+        vm.textDidChange()
+
+        // Asserted as "no longer unavailable" rather than a concrete state: the
+        // recovery kicks off a generation, so `.ready` and `.enhancing` are both
+        // legitimate outcomes depending on task scheduling.
+        if case .unavailable = vm.state {
+            Issue.record("panel stayed unavailable after the model became ready")
+        }
+    }
+
+    @Test func unavailableReasonTracksTheCurrentReason() async {
+        var current = LanguageModelAvailability.unavailable(.appleIntelligenceNotEnabled)
+        let proxy = StubTextDocumentProxy(before: "some text")
+        let vm = makeViewModel(proxy: proxy, availabilitySource: { current })
+
+        await vm.onAppear()
+        #expect(vm.state == .unavailable(.appleIntelligenceNotEnabled))
+
+        // The real sequence after a user grants Apple Intelligence: still
+        // unavailable, but now because assets are downloading.
+        current = .unavailable(.modelNotReady)
+        vm.textDidChange()
+        #expect(vm.state == .unavailable(.modelNotReady))
     }
 
     @Test func emptyFieldLandsInNeedsText() async {

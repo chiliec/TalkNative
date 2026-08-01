@@ -33,7 +33,7 @@ struct RootView: View {
                     enhancer: Enhancer(
                         provider: StubLanguageModelProvider(
                             scriptedChunks: ["I went to the store and bought some milk."]))),
-                availability: .available,
+                availability: { .available },
                 activePresets: services.presetStore.activePresets,
                 hasFullAccess: true
             ),

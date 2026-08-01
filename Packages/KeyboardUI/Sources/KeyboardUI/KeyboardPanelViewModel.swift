@@ -13,7 +13,11 @@ public final class KeyboardPanelViewModel {
     public let hasFullAccess: Bool
 
     private let proxy: any TextDocumentProxying
-    private let availability: LanguageModelAvailability
+    /// Read on demand rather than captured once. Availability is genuinely
+    /// mutable at runtime — the model finishes downloading, or the user toggles
+    /// Apple Intelligence in Settings — and a keyboard extension can outlive
+    /// such a change, so a snapshot taken at init goes stale.
+    private let availability: @MainActor () -> LanguageModelAvailability
     private let activePresets: [Preset]
     private let maxChars: Int
 
@@ -25,7 +29,7 @@ public final class KeyboardPanelViewModel {
     public init(
         proxy: any TextDocumentProxying,
         enhancement: EnhancementViewModel,
-        availability: LanguageModelAvailability,
+        availability: @escaping @MainActor () -> LanguageModelAvailability,
         activePresets: [Preset],
         hasFullAccess: Bool,
         maxChars: Int = TextCapture.defaultMaxChars
@@ -39,7 +43,7 @@ public final class KeyboardPanelViewModel {
     }
 
     public func onAppear() async {
-        if case .unavailable(let reason) = availability {
+        if case .unavailable(let reason) = availability() {
             state = .unavailable(reason)
             return
         }
@@ -80,8 +84,21 @@ public final class KeyboardPanelViewModel {
     private func handleExternalChange() {
         guard !isApplyingEdit else { return }
         switch state {
-        case .enhancing, .unavailable:
+        case .enhancing:
             return
+        case .unavailable:
+            // Re-check rather than staying stuck: if Apple Intelligence came on
+            // or the model finished downloading while the panel was up, recover
+            // in place instead of waiting for iOS to rebuild the extension.
+            // Only this direction is re-checked — entering `.unavailable` from a
+            // working state would discard a live undo plan, and a generation
+            // that fails mid-session already surfaces its own error.
+            if case .unavailable(let reason) = availability() {
+                state = .unavailable(reason)
+                return
+            }
+            recapture()
+            Task { await startIfReady() }
         case .needsText, .selectionTooLong, .ready, .replaced:
             // Falling through from `.replaced` is deliberate: any external edit
             // invalidates the undo plan, whose delete count assumes the inserted

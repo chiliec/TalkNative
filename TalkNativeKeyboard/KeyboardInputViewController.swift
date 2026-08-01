@@ -60,7 +60,7 @@ final class KeyboardInputViewController: UIInputViewController {
         let model = KeyboardPanelViewModel(
             proxy: LiveTextDocumentProxy(textDocumentProxy),
             enhancement: enhancement,
-            availability: services.provider.availability,
+            availability: { services.provider.availability },
             activePresets: services.presets.activePresets,
             hasFullAccess: hasFullAccess
         )
