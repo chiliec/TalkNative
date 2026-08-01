@@ -27,7 +27,7 @@ struct ReplacementPlanTests {
         let captured = CapturedText(text: "original words", source: .selection)
         let plan = ReplacementPlan.replacing(captured, with: "new \u{1F44D}")
         let undo = ReplacementPlan.undoing(plan, restoring: captured)
-        #expect(undo.deleteCount == 5)   // "new " + one emoji grapheme
+        #expect(undo.deleteCount == 5)  // "new " + one emoji grapheme
         #expect(undo.insert == "original words")
     }
 

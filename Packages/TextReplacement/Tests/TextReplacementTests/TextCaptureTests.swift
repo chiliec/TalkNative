@@ -5,14 +5,18 @@ import Testing
 struct TextCaptureTests {
     @Test func selectionWinsOverContext() {
         let proxy = StubTextDocumentProxy(before: "context text", selected: "chosen", after: "")
-        #expect(TextCapture.capture(from: proxy) == .captured(
-            CapturedText(text: "chosen", source: .selection)))
+        #expect(
+            TextCapture.capture(from: proxy)
+                == .captured(
+                    CapturedText(text: "chosen", source: .selection)))
     }
 
     @Test func blankSelectionFallsThroughToContext() {
         let proxy = StubTextDocumentProxy(before: "the draft", selected: "   \n ", after: "")
-        #expect(TextCapture.capture(from: proxy) == .captured(
-            CapturedText(text: "the draft", source: .contextBefore)))
+        #expect(
+            TextCapture.capture(from: proxy)
+                == .captured(
+                    CapturedText(text: "the draft", source: .contextBefore)))
     }
 
     @Test func emptyFieldYieldsEmpty() {
@@ -45,15 +49,19 @@ struct TextCaptureTests {
     @Test func selectionExactlyAtLimitIsAccepted() {
         let exact = String(repeating: "c", count: 10)
         let proxy = StubTextDocumentProxy(selected: exact)
-        #expect(TextCapture.capture(from: proxy, maxChars: 10) == .captured(
-            CapturedText(text: exact, source: .selection)))
+        #expect(
+            TextCapture.capture(from: proxy, maxChars: 10)
+                == .captured(
+                    CapturedText(text: exact, source: .selection)))
     }
 
     @Test func lengthsAreCountedInGraphemeClusters() {
         // Five flags: 5 graphemes, 20 UTF-16 units. Must be accepted at maxChars 10.
         let flags = String(repeating: "\u{1F1FA}\u{1F1E6}", count: 5)
         let proxy = StubTextDocumentProxy(selected: flags)
-        #expect(TextCapture.capture(from: proxy, maxChars: 10) == .captured(
-            CapturedText(text: flags, source: .selection)))
+        #expect(
+            TextCapture.capture(from: proxy, maxChars: 10)
+                == .captured(
+                    CapturedText(text: flags, source: .selection)))
     }
 }
