@@ -4,7 +4,7 @@ options:
     iOS: "26.0"
   bundleIdPrefix: com.axveer
   groupOrdering:
-    - order: [TalkNative, EnhanceExtension, Packages, docs, scripts]
+    - order: [TalkNative, EnhanceExtension, TalkNativeKeyboard, Packages, docs, scripts]
 
 settings:
   base:
@@ -16,6 +16,8 @@ packages:
   PresetKit:    { path: Packages/PresetKit }
   HistoryKit:   { path: Packages/HistoryKit }
   EnhancerUI:   { path: Packages/EnhancerUI }
+  TextReplacement: { path: Packages/TextReplacement }
+  KeyboardUI:      { path: Packages/KeyboardUI }
 
 targets:
   TalkNative:
@@ -36,6 +38,8 @@ targets:
           - group.com.axveer.talknative
     dependencies:
       - target: EnhanceExtension
+        embed: true
+      - target: TalkNativeKeyboard
         embed: true
       - package: EnhancerCore
       - package: PresetKit
@@ -92,6 +96,39 @@ targets:
     sources: [TalkNativeUITests]
     dependencies:
       - target: TalkNative
+
+  TalkNativeKeyboard:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "26.0"
+    sources: [TalkNativeKeyboard]
+    info:
+      path: TalkNativeKeyboard/Info.plist
+      properties:
+        CFBundleDisplayName: TalkNative
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.keyboard-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).KeyboardInputViewController
+          NSExtensionAttributes:
+            IsASCIICapable: false
+            PrefersRightToLeft: false
+            PrimaryLanguage: en-US
+            RequestsOpenAccess: true
+    entitlements:
+      path: TalkNativeKeyboard/TalkNativeKeyboard.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.axveer.talknative
+    dependencies:
+      - package: EnhancerCore
+      - package: PresetKit
+      - package: HistoryKit
+      - package: EnhancerUI
+      - package: KeyboardUI
+      - package: TextReplacement
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.axveer.talknative.keyboard
 
   DeviceSmokeTests:
     type: bundle.unit-test
