@@ -32,7 +32,14 @@ final class KeyboardPanelUITests: XCTestCase {
         XCTAssertTrue(undo.waitForExistence(timeout: 5))
         undo.tap()
 
-        XCTAssertFalse(app.otherElements["keyboardPanel.replacedConfirmation"].exists)
-        XCTAssertTrue(app.buttons["Use"].firstMatch.isEnabled)
+        // Waited for, not sampled: `tap()` returns once the event is delivered,
+        // before SwiftUI has re-rendered `.ready`, so a bare `exists` reads the
+        // stale `.replaced` hierarchy and fails on a loaded machine.
+        XCTAssertTrue(
+            app.otherElements["keyboardPanel.replacedConfirmation"].waitForNonExistence(timeout: 5))
+        let enabledAgain = XCTNSPredicateExpectation(
+            predicate: NSPredicate(format: "isEnabled == true"),
+            object: app.buttons["Use"].firstMatch)
+        XCTAssertEqual(XCTWaiter.wait(for: [enabledAgain], timeout: 5), .completed)
     }
 }
