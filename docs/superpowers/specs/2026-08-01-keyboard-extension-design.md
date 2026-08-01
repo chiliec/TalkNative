@@ -167,21 +167,31 @@ public struct CapturedText: Equatable, Sendable {
     public let source: Source
 }
 
+public enum CaptureOutcome: Equatable, Sendable {
+    case captured(CapturedText)
+    case selectionTooLong(count: Int)
+    case empty
+}
+
 public enum TextCapture {
+    public static let defaultMaxChars = 2000
+
     public static func capture(
-        from proxy: some TextDocumentProxying,
-        maxChars: Int = 2000
-    ) -> CapturedText?
+        from proxy: any TextDocumentProxying,
+        maxChars: Int = defaultMaxChars
+    ) -> CaptureOutcome
 }
 ```
 
 Policy, in order:
 
-1. If `selectedText` is non-nil and non-blank after trimming → `.selection`.
-2. Else if `documentContextBeforeInput` is non-nil and non-blank after trimming → `.contextBefore`.
-3. Else `nil`.
+1. If `selectedText` is non-nil and non-blank after trimming: over `maxChars` → `.selectionTooLong(count:)`; otherwise `.captured` with source `.selection`.
+2. Else if `documentContextBeforeInput` is non-nil and non-blank after trimming → `.captured` with source `.contextBefore`, clamped to the **trailing** `maxChars` characters.
+3. Else `.empty`.
 
-`maxChars` defaults to 2000, matching `TextEditorBox(maxChars:)` in the app (`EnhanceTab.swift:21`). When the captured string exceeds it, the **trailing** `maxChars` characters are kept — the text nearest the cursor is what the user is working on.
+**An over-long selection is an error, not a clamp.** This asymmetry is required for correctness. A `.selection` plan emits `deleteCount == 1`, which deletes the *entire* selection regardless of how much of it was captured. Clamping a 5000-character selection to its trailing 2000 and replacing would delete all 5000 and insert a rewrite of the last 2000 — silently destroying 3000 characters the user never saw go missing. Clamping is safe only for `.contextBefore`, where `deleteCount` is derived from the clamped string itself.
+
+`maxChars` defaults to 2000, matching `TextEditorBox(maxChars:)` in the app (`EnhanceTab.swift:21`).
 
 ### `ReplacementPlan` and `TextReplacer` *(TextReplacement)*
 
@@ -217,6 +227,7 @@ An in-memory model of a text field: a full string plus a selection range. `delet
 ```swift
 public enum KeyboardPanelState: Equatable {
     case needsText
+    case selectionTooLong(count: Int)
     case ready(CapturedText)
     case enhancing(CapturedText)
     case replaced(undo: ReplacementPlan, original: CapturedText)
@@ -310,7 +321,9 @@ The second guard is load-bearing. The undo plan's `deleteCount` assumes the inse
 
 `documentContextBeforeInput` is reported to truncate at roughly 300 characters in several major hosts, and there is no reliable way to detect that it happened. Rather than silently rewriting a fragment of what the user believes they are rewriting, the panel renders the captured text as a preview strip above the variants. What you see is what gets rewritten. The `.needsText` and empty-state copy both steer toward selecting text, because a selection is exact and immune to this limit.
 
-### Full Access prompt dismissal
+### The Full Access prompt is instructional, not a link
+
+A keyboard extension has no access to `UIApplication.shared` and cannot reliably open a URL, so the prompt row cannot deep-link into Settings. It shows the literal path as text — "Settings → General → Keyboard → Keyboards → TalkNative → Allow Full Access" — plus a dismiss control. Any responder-chain trick to reach `openURL` from an extension is out of scope and App Store risk.
 
 The dismissal flag is written to the keyboard's own `UserDefaults.standard`, not the App Group — the App Group is unreachable in precisely the state where this prompt is shown.
 
