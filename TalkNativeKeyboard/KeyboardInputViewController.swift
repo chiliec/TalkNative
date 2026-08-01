@@ -1,12 +1,15 @@
 import UIKit
 import SwiftUI
 import KeyboardUI
+import EnhancerUI
+import HistoryKit
 
 final class KeyboardInputViewController: UIInputViewController {
     private static let panelHeight: CGFloat = 290
     private static let promptDismissedKey = "keyboard.fullAccessPromptDismissed.v1"
 
     private var viewModel: KeyboardPanelViewModel?
+    private var services: KeyboardServices?
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,14 +55,21 @@ final class KeyboardInputViewController: UIInputViewController {
 
     private func installPanel() {
         let services = KeyboardServices.make(hasFullAccess: hasFullAccess)
+        self.services = services
+        let enhancement = services.makeEnhancementViewModel()
         let model = KeyboardPanelViewModel(
             proxy: LiveTextDocumentProxy(textDocumentProxy),
-            enhancement: services.makeEnhancementViewModel(),
+            enhancement: enhancement,
             availability: services.provider.availability,
             activePresets: services.presets.activePresets,
             hasFullAccess: hasFullAccess
         )
         viewModel = model
+
+        Task { [weak self] in
+            await enhancement.waitForCompletion()
+            self?.recordCompletedRun(from: enhancement)
+        }
 
         let defaults = UserDefaults.standard
         let panel = KeyboardPanel(
@@ -80,5 +90,17 @@ final class KeyboardInputViewController: UIInputViewController {
             hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: -48),
         ])
         hosting.didMove(toParent: self)
+    }
+
+    private func recordCompletedRun(from enhancement: EnhancementViewModel) {
+        let variants = enhancement.variantStates.compactMap { state -> SavedVariant? in
+            guard case .completed = state.phase else { return nil }
+            return SavedVariant(
+                presetID: state.presetID,
+                presetLabelSnapshot: state.presetLabel,
+                outputText: state.text
+            )
+        }
+        services?.record(inputText: enhancement.inputText, variants: variants)
     }
 }
