@@ -13,7 +13,7 @@ jobs:
   packages:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Select Xcode
         run: sudo xcode-select -s "$XCODE_APP"
       - name: Test EnhancerCore
@@ -32,7 +32,7 @@ jobs:
   xcode:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Select Xcode
         run: sudo xcode-select -s "$XCODE_APP"
       - name: Install xcodegen
@@ -66,7 +66,7 @@ jobs:
   lint:
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install swift-format
         run: brew install swift-format
       - name: Lint
@@ -75,6 +75,6 @@ jobs:
   no-network:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: No-network guard
         run: ./scripts/no-network-check.sh
