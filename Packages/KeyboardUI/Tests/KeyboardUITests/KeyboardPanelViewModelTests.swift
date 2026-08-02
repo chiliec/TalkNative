@@ -222,6 +222,23 @@ struct KeyboardPanelViewModelTests {
         #expect(proxy.document == "Say howdy")
     }
 
+    /// Item 7 of the device checklist, driven through the view model rather than
+    /// `TextReplacer` alone: a grapheme-heavy selection must survive
+    /// replace-then-undo with the surrounding text untouched. A `utf16.count`
+    /// delete anywhere in the `select`/`undo` wiring would eat into "PRE ".
+    @Test func unicodeSelectionSurvivesReplaceAndUndo() async {
+        let flagsAndFamily = "\u{1F1FA}\u{1F1E6} \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}"
+        let proxy = StubTextDocumentProxy(before: "PRE ", selected: flagsAndFamily, after: " POST")
+        let vm = makeViewModel(proxy: proxy)
+        await vm.onAppear()
+
+        vm.select(variantText: "rewritten")
+        #expect(proxy.document == "PRE rewritten POST")
+
+        vm.undo()
+        #expect(proxy.document == "PRE \(flagsAndFamily) POST")
+    }
+
     @Test func externalEditWhileReplacedInvalidatesUndo() async {
         let proxy = StubTextDocumentProxy(before: "Say ", selected: "hello", after: "")
         let vm = makeViewModel(proxy: proxy)

@@ -29,6 +29,10 @@ public struct FullAccessPromptRow: View {
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
+        // `.contain` keeps the container queryable by its own identifier while
+        // leaving the Dismiss button independently addressable — the same
+        // grouping the replaced-confirmation strip relies on.
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("keyboardPanel.fullAccessPrompt")
     }
 }
