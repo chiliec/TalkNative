@@ -18,6 +18,14 @@ final class KeyboardInputViewController: UIInputViewController {
         installPanel()
     }
 
+    /// The document context is not reliably readable during `viewDidLoad`, and
+    /// switching into our keyboard delivers no text-change event to recover on,
+    /// so the capture is re-run once the input view is actually up.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        viewModel?.inputViewDidAppear()
+    }
+
     override func textDidChange(_ textInput: UITextInput?) {
         super.textDidChange(textInput)
         viewModel?.textDidChange()

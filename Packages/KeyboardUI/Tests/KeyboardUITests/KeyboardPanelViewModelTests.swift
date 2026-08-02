@@ -89,6 +89,66 @@ struct KeyboardPanelViewModelTests {
         #expect(vm.state == .unavailable(.modelNotReady))
     }
 
+    /// Generation is kicked off from a `Task`, so the state transition is not
+    /// synchronous with the call that triggers it.
+    private func waitUntil(_ predicate: @MainActor () -> Bool) async -> Bool {
+        for _ in 0..<500 {
+            if predicate() { return true }
+            await Task.yield()
+        }
+        return predicate()
+    }
+
+    /// The keyboard's real opening move: the extension loads before the host
+    /// hands over any document context, so the first capture sees an empty
+    /// field. Appearing has to re-read it, and finding text has to generate —
+    /// otherwise the panel sits on "type something first" over a full field, or
+    /// shows a capture strip with no rows and no way to start a run.
+    @Test func appearingAfterAnEmptyFirstCaptureCapturesAndGenerates() async {
+        let proxy = StubTextDocumentProxy()
+        let vm = makeViewModel(proxy: proxy)
+        await vm.onAppear()
+        #expect(vm.state == .needsText)
+
+        proxy.before = "i has went to the store"
+        vm.inputViewDidAppear()
+
+        #expect(await waitUntil { vm.enhancement.variantStates.isEmpty == false })
+    }
+
+    /// Re-targeting to a different sentence must regenerate; leaving the old
+    /// variants up would attribute them to text they were not produced from.
+    @Test func retargetingToDifferentTextRegenerates() async {
+        let proxy = StubTextDocumentProxy(before: "first draft")
+        let vm = makeViewModel(proxy: proxy)
+        await vm.onAppear()
+        #expect(vm.state == .ready(CapturedText(text: "first draft", source: .contextBefore)))
+
+        proxy.before = "a completely different sentence"
+        vm.textDidChange()
+
+        #expect(
+            await waitUntil {
+                vm.enhancement.inputText == "a completely different sentence"
+            })
+    }
+
+    /// Undo restores exactly the text the variants came from, so it must not
+    /// spend a second model run reproducing what is already on screen.
+    @Test func undoDoesNotRegenerate() async {
+        let proxy = StubTextDocumentProxy(before: "Say ", selected: "hello", after: "")
+        let vm = makeViewModel(proxy: proxy)
+        await vm.onAppear()
+
+        vm.select(variantText: "greetings")
+        vm.undo()
+        #expect(vm.state == .ready(CapturedText(text: "hello", source: .contextBefore)))
+
+        // Still `.ready`, never promoted to `.enhancing` by a fresh run.
+        _ = await waitUntil { false }
+        #expect(vm.state == .ready(CapturedText(text: "hello", source: .contextBefore)))
+    }
+
     @Test func emptyFieldLandsInNeedsText() async {
         let vm = makeViewModel(proxy: StubTextDocumentProxy())
         await vm.onAppear()

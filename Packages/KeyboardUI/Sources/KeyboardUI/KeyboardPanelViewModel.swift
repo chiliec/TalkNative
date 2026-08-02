@@ -26,6 +26,11 @@ public final class KeyboardPanelViewModel {
     /// re-capturing mid-replacement would corrupt the plan.
     private var isApplyingEdit = false
 
+    /// The text the visible variants were generated from. Guards regeneration so
+    /// a re-capture that lands on the same text is free, and so undo — which
+    /// restores exactly what we generated from — does not re-run the model.
+    private var lastGeneratedText: String?
+
     public init(
         proxy: any TextDocumentProxying,
         enhancement: EnhancementViewModel,
@@ -53,6 +58,14 @@ public final class KeyboardPanelViewModel {
 
     public func textDidChange() { handleExternalChange() }
     public func selectionDidChange() { handleExternalChange() }
+
+    /// The input view just became visible.
+    ///
+    /// Switching *into* our keyboard is not a text change, so the host delivers
+    /// no `textDidChange` for it. Without this hook the panel keeps whatever the
+    /// proxy reported while the extension was still loading — which is usually
+    /// nothing, leaving `.needsText` on screen over a field full of text.
+    public func inputViewDidAppear() { handleExternalChange() }
 
     /// Replace the captured span with `variantText` and arm the undo plan.
     public func select(variantText: String) {
@@ -104,7 +117,16 @@ public final class KeyboardPanelViewModel {
             // invalidates the undo plan, whose delete count assumes the inserted
             // text is still immediately behind the cursor.
             recapture()
+            startIfCapturedTextChanged()
         }
+    }
+
+    /// Re-target means re-generate. Capturing new text without regenerating
+    /// leaves the rows showing variants of the *previous* text — actively
+    /// misleading, and the panel has no button to trigger a run by hand.
+    private func startIfCapturedTextChanged() {
+        guard case .ready(let captured) = state, captured.text != lastGeneratedText else { return }
+        Task { await startIfReady() }
     }
 
     private func recapture() {
@@ -120,6 +142,7 @@ public final class KeyboardPanelViewModel {
 
     private func startIfReady() async {
         guard case .ready(let captured) = state else { return }
+        lastGeneratedText = captured.text
         state = .enhancing(captured)
         await enhancement.start(inputText: captured.text, activePresets: activePresets)
         await enhancement.waitForCompletion()
