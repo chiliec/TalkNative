@@ -2375,18 +2375,20 @@ git commit -m "docs: replace Action extension with keyboard extension across doc
 
 - [ ] **Step 7: Run the manual device checklist**
 
-This cannot be automated. Work through it on a physical Apple Intelligence-capable device and record the result in the PR description.
+Work through it on a physical Apple Intelligence-capable device and record the result in the PR description.
 
-1. Enable the keyboard: Settings → General → Keyboard → Keyboards → Add New Keyboard → TalkNative.
-2. **Without Full Access:** open Notes, type a sentence, switch to the TalkNative keyboard. Confirm variants generate from built-in presets, no custom presets appear, and the Full Access prompt row is shown and dismisses permanently.
-3. **Grant Full Access**, relaunch the keyboard. Confirm custom presets appear and a new entry lands in the app's Recents tab.
-4. **Selection replace** in Messages, Notes, Safari, and Gmail: select a sentence, switch keyboards, tap a variant, confirm only the selection changed.
-5. **Before-cursor replace** in the same four apps: type a sentence without selecting, tap a variant, confirm the sentence is replaced and preceding text is untouched.
-6. **Undo** in each app: confirm the original text returns exactly.
-7. **Unicode:** type `caf\u{65}\u{301} \u{1F1FA}\u{1F1E6} \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}`, replace, then undo. Confirm no over-deletion into preceding text.
-8. **Long selection:** select more than 2000 characters and confirm the "select up to 2000" message appears and **nothing is replaced**.
-9. **Memory:** invoke the keyboard ten times in one session across apps. Confirm no termination.
-10. **Globe key:** confirm it switches away correctly from every panel state.
+Items marked **[auto]** now have automated coverage through the scenario-driven `-showKeyboardPanel` harness (`TALKNATIVE_KEYBOARD_SCENARIO`) and the view-model/round-trip suites — see `TalkNativeUITests/KeyboardPanelUITests.swift` and `Packages/KeyboardUI/Tests`. The device run still validates them against real hosts, but a regression will fail in CI first. Items marked **[manual]** are system-level (Settings toggles, App Group state, jetsam, the globe key) and cannot be driven by XCUITest.
+
+1. **[manual]** Enable the keyboard: Settings → General → Keyboard → Keyboards → Add New Keyboard → TalkNative.
+2. **[auto: partial]** **Without Full Access:** open Notes, type a sentence, switch to the TalkNative keyboard. Confirm variants generate from built-in presets, no custom presets appear, and the Full Access prompt row is shown and dismisses permanently. *(Automated: prompt row shown without Full Access, absent once dismissed, variants still generate — `testFullAccessPromptShownWithoutFullAccess`, `testFullAccessPromptHiddenOnceDismissed`. Manual: that the presets are the built-ins and no custom ones leak — an App Group concern.)*
+3. **[manual]** **Grant Full Access**, relaunch the keyboard. Confirm custom presets appear and a new entry lands in the app's Recents tab.
+4. **[auto]** **Selection replace** in Messages, Notes, Safari, and Gmail: select a sentence, switch keyboards, tap a variant, confirm only the selection changed. *(`testVariantRowAppearsAndReplaceShowsUndo`; span integrity in the round-trip and view-model suites.)*
+5. **[auto]** **Before-cursor replace** in the same four apps: type a sentence without selecting, tap a variant, confirm the sentence is replaced and preceding text is untouched. *(`testBeforeCursorTextReplaceShowsUndo`; `.contextBefore` arithmetic in the round-trip suite.)*
+6. **[auto]** **Undo** in each app: confirm the original text returns exactly. *(`testUndoReturnsToVariantList`; `undoRestoresTheOriginalDocument`.)*
+7. **[auto]** **Unicode:** type `caf\u{65}\u{301} \u{1F1FA}\u{1F1E6} \u{1F468}\u{200D}\u{1F469}\u{200D}\u{1F467}\u{200D}\u{1F466}`, replace, then undo. Confirm no over-deletion into preceding text. *(`unicodeSelectionSurvivesReplaceAndUndo`; the `UnicodeCorpus` round-trip.)*
+8. **[auto]** **Long selection:** select more than 2000 characters and confirm the "select up to 2000" message appears and **nothing is replaced**. *(`testLongSelectionShowsLimitMessageAndOffersNoReplacement`.)*
+9. **[manual]** **Memory:** invoke the keyboard ten times in one session across apps. Confirm no termination. *(Produces the memory figure for the spec note — the one gate item still outstanding.)*
+10. **[manual]** **Globe key:** confirm it switches away correctly from every panel state.
 
 ---
 
