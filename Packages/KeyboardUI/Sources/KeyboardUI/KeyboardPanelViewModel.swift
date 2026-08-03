@@ -21,6 +21,13 @@ public final class KeyboardPanelViewModel {
     private let activePresets: [Preset]
     private let maxChars: Int
 
+    /// Fired once per completed generation, including re-targeted runs. The
+    /// keyboard uses it to record the run to Recents. Driven from here rather
+    /// than from a one-shot observer in the controller, which could only ever
+    /// catch a single run — and, racing the first `start()`, usually caught
+    /// none.
+    private let onRunCompleted: @MainActor () -> Void
+
     /// True while we are the ones editing the document. The host fires
     /// `textDidChange` for our own `insertText`/`deleteBackward` calls, and
     /// re-capturing mid-replacement would corrupt the plan.
@@ -37,7 +44,8 @@ public final class KeyboardPanelViewModel {
         availability: @escaping @MainActor () -> LanguageModelAvailability,
         activePresets: [Preset],
         hasFullAccess: Bool,
-        maxChars: Int = TextCapture.defaultMaxChars
+        maxChars: Int = TextCapture.defaultMaxChars,
+        onRunCompleted: @escaping @MainActor () -> Void = {}
     ) {
         self.proxy = proxy
         self.enhancement = enhancement
@@ -45,6 +53,7 @@ public final class KeyboardPanelViewModel {
         self.activePresets = activePresets
         self.hasFullAccess = hasFullAccess
         self.maxChars = maxChars
+        self.onRunCompleted = onRunCompleted
     }
 
     public func onAppear() async {
@@ -149,5 +158,6 @@ public final class KeyboardPanelViewModel {
         if case .enhancing = state {
             state = .ready(captured)
         }
+        onRunCompleted()
     }
 }

@@ -70,14 +70,13 @@ final class KeyboardInputViewController: UIInputViewController {
             enhancement: enhancement,
             availability: { services.provider.availability },
             activePresets: services.presets.activePresets,
-            hasFullAccess: hasFullAccess
+            hasFullAccess: hasFullAccess,
+            // Fires per completed run, so re-targeted generations reach Recents
+            // too — not just the first. A one-shot observer here raced the first
+            // `start()` and usually recorded nothing at all.
+            onRunCompleted: { [weak self] in self?.recordCompletedRun(from: enhancement) }
         )
         viewModel = model
-
-        Task { [weak self] in
-            await enhancement.waitForCompletion()
-            self?.recordCompletedRun(from: enhancement)
-        }
 
         let defaults = UserDefaults.standard
         let panel = KeyboardPanel(
