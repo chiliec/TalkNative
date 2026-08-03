@@ -18,7 +18,8 @@ struct KeyboardPanelViewModelTests {
         availability: LanguageModelAvailability = .available,
         chunks: [String] = ["polished text"],
         hasFullAccess: Bool = true,
-        maxChars: Int = TextCapture.defaultMaxChars
+        maxChars: Int = TextCapture.defaultMaxChars,
+        onRunCompleted: @escaping @MainActor () -> Void = {}
     ) -> KeyboardPanelViewModel {
         let provider = StubLanguageModelProvider(availability: availability, scriptedChunks: chunks)
         return KeyboardPanelViewModel(
@@ -27,7 +28,8 @@ struct KeyboardPanelViewModelTests {
             availability: { availability },
             activePresets: makePresets(),
             hasFullAccess: hasFullAccess,
-            maxChars: maxChars
+            maxChars: maxChars,
+            onRunCompleted: onRunCompleted
         )
     }
 
@@ -131,6 +133,23 @@ struct KeyboardPanelViewModelTests {
             await waitUntil {
                 vm.enhancement.inputText == "a completely different sentence"
             })
+    }
+
+    /// Every completed generation must be reported once — the first run *and*
+    /// each re-target. The keyboard hangs its Recents recording off this hook;
+    /// a one-shot observer would drop re-targeted runs (and, racing the first
+    /// `start()`, usually record nothing).
+    @Test func reportsEachCompletedRunIncludingRetargets() async {
+        let proxy = StubTextDocumentProxy(before: "first draft")
+        var completions = 0
+        let vm = makeViewModel(proxy: proxy, onRunCompleted: { completions += 1 })
+
+        await vm.onAppear()
+        #expect(await waitUntil { completions == 1 })
+
+        proxy.before = "a completely different sentence"
+        vm.textDidChange()
+        #expect(await waitUntil { completions == 2 })
     }
 
     /// Undo restores exactly the text the variants came from, so it must not
