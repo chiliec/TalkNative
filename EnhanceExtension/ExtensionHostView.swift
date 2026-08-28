@@ -57,7 +57,7 @@ struct ExtensionHostView: View {
             return SavedVariant(presetID: s.presetID, presetLabelSnapshot: s.presetLabel, outputText: s.text)
         }
         guard !variants.isEmpty else { return }
-        try? services.history.insert(
+        try? services.history?.insert(
             inputText: vm.inputText,
             variants: variants,
             deviceModelName: UIDevice.current.model
@@ -68,7 +68,7 @@ struct ExtensionHostView: View {
 @MainActor
 struct ExtensionServices {
     let presets: PresetStore
-    let history: HistoryStore
+    let history: HistoryStore?
     let enhancer: Enhancer
     let provider: any LanguageModelProvider
 
@@ -79,10 +79,14 @@ struct ExtensionServices {
         presets.seedIfNeeded()
 
         let containerURL = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupID)
+        // Prefer the shared App Group store; fall back to an in-memory store if
+        // it's unavailable. Both inits can throw (schema/migration), so degrade
+        // to no history rather than force-try — a share extension must never
+        // crash the user's enhancement flow just because history is unavailable.
         let container =
             (try? HistorySchema.makeContainer(appGroupURL: containerURL))
-            ?? (try! HistorySchema.makeContainer(appGroupURL: nil))
-        let history = HistoryStore(container: container)
+            ?? (try? HistorySchema.makeContainer(appGroupURL: nil))
+        let history = container.map(HistoryStore.init(container:))
 
         let provider = FoundationModelsProvider()
         return ExtensionServices(
