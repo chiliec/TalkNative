@@ -8,6 +8,10 @@ public enum LanguageModelAvailability: Sendable, Equatable {
         case deviceNotEligible
         case appleIntelligenceNotEnabled
         case modelNotReady
+        /// Cloud tier: the user hasn't allowed sending text to the gateway yet.
+        case cloudConsentRequired
+        /// Cloud tier, keyboard only: no network without Full Access.
+        case fullAccessRequired
         case other(String)
     }
 }

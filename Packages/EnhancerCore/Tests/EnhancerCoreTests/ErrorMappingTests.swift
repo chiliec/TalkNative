@@ -22,10 +22,25 @@ struct ErrorMappingTests {
             EnhancerError.modelUnavailable(.appleIntelligenceNotEnabled).userFacingMessage,
             EnhancerError.modelUnavailable(.modelNotReady).userFacingMessage,
             EnhancerError.modelUnavailable(.other("boom")).userFacingMessage,
+            EnhancerError.modelUnavailable(.cloudConsentRequired).userFacingMessage,
+            EnhancerError.modelUnavailable(.fullAccessRequired).userFacingMessage,
         ]
-        #expect(Set(messages).count == 4)
+        #expect(Set(messages).count == 6)
         #expect(messages[1].contains("Settings"))
         #expect(messages[2].contains("downloading"))
+        #expect(messages[4] == "Open TalkNative once to allow cloud mode on this iPhone.")
+        #expect(messages[5] == "Turn on Allow Full Access for TalkNative in Settings to use it on this iPhone.")
+    }
+
+    @Test func offlineIsRetryableWithOwnMessage() {
+        #expect(EnhancerError.offline.userFacingMessage == "No internet connection.")
+        #expect(EnhancerError.offline.isRetryable == true)
+    }
+
+    @Test func defaultMapperPassesEnhancerErrorsThrough() {
+        #expect(Enhancer.defaultErrorMapper(EnhancerError.guardrailViolation) == .guardrailViolation)
+        #expect(Enhancer.defaultErrorMapper(EnhancerError.offline) == .offline)
+        #expect(Enhancer.defaultErrorMapper(CancellationError()) == .cancelled)
     }
 
     @Test func onlyADownloadingModelIsWorthRetrying() {
