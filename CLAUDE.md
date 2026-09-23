@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 TalkNative is an on-device iOS text enhancer for non-native English speakers, built on Apple Foundation Models (iOS 26+, Apple Intelligence required). Given input text, it streams three rewrites in parallel tone presets. Swift 6, SwiftUI, Swift Concurrency throughout.
 
-Design specs live in `docs/superpowers/specs/`, implementation plans in `docs/superpowers/plans/`. The cloud-fallback-tier spec/plan (BYOK Anthropic tier for non-Apple-Intelligence devices) is approved but **not yet implemented** — the no-network constraint below still holds.
+Design specs live in `docs/superpowers/specs/`, implementation plans in `docs/superpowers/plans/`. On iOS 26 devices without Apple Intelligence, `GatewayProvider` streams from the TalkNative gateway (`gateway.nextgensoft.co`, Anthropic format) after user consent; the key is injected from the gitignored `Config/Secrets.xcconfig` (see `Config/Secrets.example.xcconfig`).
 
 ## Commands
 
@@ -57,11 +57,12 @@ Key seams to know:
 - **`Enhancer.enhance(_:)`** returns an `AsyncStream<VariantChunk>` (`.started` / `.delta` / `.completed` / `.failed` per preset). Generations run **sequentially** per preset, each with a fresh session — no context carries between generations.
 - **`AppServices`** (TalkNative target) is the composition root: `makeProduction()` wires real stores + `FoundationModelsProvider`; `makeStubbed()` wires `StubLanguageModelProvider` for UI tests.
 - **App Group** `group.com.axveer.talknative` (see `AppGroup.swift`): `PresetStore` defaults and the SwiftData container both live in the group so the app and the Share extension share state.
-- **UI-test hooks** (`LaunchArguments.swift`): launch arg `-useStubEnhancer` swaps in the stub provider; env var `TALKNATIVE_PREFILL_INPUT` prefills the input box.
+- **UI-test hooks** (`LaunchArguments.swift`): launch arg `-useStubEnhancer` swaps in the stub provider; env var `TALKNATIVE_PREFILL_INPUT` prefills the input box; `-simulateIneligibleDevice` (with `-useStubEnhancer`) shows the cloud consent flow.
 - **`TalkNativeKeyboard`** — custom keyboard extension (`com.apple.keyboard-service`). Holds only `KeyboardInputViewController`, `LiveTextDocumentProxy`, and `KeyboardServices`. Works without Full Access using built-in presets; Full Access unlocks App Group presets and history.
+- **`ProviderSelector`** (EnhancerCore) — the only place that chooses between `FoundationModelsProvider` and `GatewayProvider`; all three composition roots call it.
 
 ## Constraints
 
-- **Zero network calls.** Enforced by `scripts/no-network-check.sh` in CI over `Packages`, `TalkNative`, and `EnhanceExtension`. (The cloud-fallback spec will narrow this guard when implemented — until then, do not introduce networking APIs.)
+- **Zero network calls on Apple-Intelligence devices.** Only `GatewayProvider.swift` may use networking APIs, enforced by the allowlist in `scripts/no-network-check.sh`.
 - No accounts, no telemetry; user data never leaves the device.
 - In-place text replacement ships as a **custom keyboard extension**, not an Action extension. An Action extension cannot write back into a host app's text field on iOS — see `docs/superpowers/specs/2026-08-01-keyboard-extension-design.md`.

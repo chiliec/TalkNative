@@ -9,7 +9,10 @@ struct AboutView: View {
                     "An on-device text enhancer that helps non-native English speakers write messages that sound native — across casual and professional registers."
                 )
                 Text(
-                    "All processing runs on your device using Apple Intelligence. No accounts, no network, no tracking."
+                    "On iPhones with Apple Intelligence, all processing runs on your device. No accounts, no network, no tracking."
+                )
+                Text(
+                    "On other iPhones, you can turn on cloud mode: the text you enhance is sent to the TalkNative gateway, which uses Anthropic's Claude model. Still no accounts and no tracking."
                 )
                 Text("Version 1.0").foregroundStyle(.secondary).font(.footnote)
             }
