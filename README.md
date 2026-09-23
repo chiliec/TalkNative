@@ -7,7 +7,7 @@
 
 TalkNative rewrites text for non-native English speakers using Apple Foundation Models (iOS 26+, Apple Intelligence). Every enhancement returns three rewrites in configurable tones — fixing grammar, idioms, and awkward phrasing while preserving your meaning and register.
 
-- 🔒 **Private by design** — zero network calls, no accounts, no telemetry. Enforced in CI.
+- 🔒 **Private by design** — zero network calls on Apple-Intelligence devices, no accounts, no telemetry. Only `GatewayProvider.swift` may talk to the network (the cloud fallback tier, used with consent), enforced by the allowlist in `scripts/no-network-check.sh`.
 - ⚡ **Streaming results** — three tone variants stream in live, one card per preset.
 - 📤 **Works everywhere** — standalone app or via the Share sheet from any app.
 - 🕘 **Recent history** — your last 50 enhancements, stored locally.
@@ -67,8 +67,8 @@ Full design spec: [`docs/superpowers/specs/2026-04-18-talknative-design.md`](doc
 
 In-place rewriting is delivered by a custom keyboard rather than an Action extension — iOS gives an Action extension no way to write back into the host app's text field. Enable it under Settings → General → Keyboard → Keyboards → TalkNative.
 
-The keyboard works immediately with the eight built-in presets. Granting **Allow Full Access** additionally makes your custom presets and Recents available to it; TalkNative has no network code at all, enforced in CI by `scripts/no-network-check.sh`.
+The keyboard works immediately with the eight built-in presets. Granting **Allow Full Access** additionally makes your custom presets and Recents available to it; network access is confined to `GatewayProvider.swift`'s cloud fallback tier, enforced in CI by `scripts/no-network-check.sh`.
 
-## Roadmap
+## Cloud gateway tier
 
-A BYOK cloud fallback tier (Anthropic Claude Haiku) for devices without Apple Intelligence is specced and approved: [`docs/superpowers/specs/2026-04-18-cloud-fallback-tier-design.md`](docs/superpowers/specs/2026-04-18-cloud-fallback-tier-design.md)
+On iOS 26 devices without Apple Intelligence, `GatewayProvider` streams enhancements from a remote gateway after user consent, with the gateway key injected at build time via `Config/Secrets.xcconfig`. All other devices keep running fully on-device.

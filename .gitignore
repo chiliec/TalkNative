@@ -26,3 +26,9 @@ TalkNative.xcodeproj/
 
 # CI
 .env
+
+# Local git worktrees (scratch, per-plan)
+.worktrees/
+
+# Gateway key (see Config/Secrets.example.xcconfig)
+Config/Secrets.xcconfig

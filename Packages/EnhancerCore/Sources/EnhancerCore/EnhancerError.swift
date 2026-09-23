@@ -6,6 +6,7 @@ public enum EnhancerError: Error, Sendable, Equatable {
     case exceededContextWindow
     case modelUnavailable(LanguageModelAvailability.Reason)
     case cancelled
+    case offline
     case unknown(String)
 
     public static func unknown(_ error: Error) -> EnhancerError {
@@ -24,6 +25,8 @@ public enum EnhancerError: Error, Sendable, Equatable {
             return Self.unavailableMessage(reason)
         case .cancelled:
             return "Cancelled."
+        case .offline:
+            return "No internet connection."
         case .unknown:
             return "Something went wrong."
         }
@@ -40,6 +43,10 @@ public enum EnhancerError: Error, Sendable, Equatable {
             return "Turn on Apple Intelligence in Settings to use TalkNative."
         case .modelNotReady:
             return "Apple Intelligence is still downloading — try again shortly."
+        case .cloudConsentRequired:
+            return "Open TalkNative once to allow cloud mode on this iPhone."
+        case .fullAccessRequired:
+            return "Turn on Allow Full Access for TalkNative in Settings to use it on this iPhone."
         case .other:
             return "Apple Intelligence isn't available right now."
         }
@@ -47,7 +54,7 @@ public enum EnhancerError: Error, Sendable, Equatable {
 
     public var isRetryable: Bool {
         switch self {
-        case .rateLimited, .unknown: return true
+        case .rateLimited, .unknown, .offline: return true
         // The model becoming ready is a matter of waiting, unlike an ineligible
         // device or a disabled feature, which need the user to act.
         case .modelUnavailable(.modelNotReady): return true

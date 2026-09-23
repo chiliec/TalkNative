@@ -15,6 +15,7 @@ public actor Enhancer {
     }
 
     public static let defaultErrorMapper: ErrorMapper = { error in
+        if let error = error as? EnhancerError { return error }
         if error is CancellationError { return .cancelled }
         return .unknown(error)
     }

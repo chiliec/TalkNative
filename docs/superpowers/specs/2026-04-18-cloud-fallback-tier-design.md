@@ -1,7 +1,7 @@
 # TalkNative — Cloud Fallback Tier (Design Spec)
 
 **Date:** 2026-04-18
-**Status:** Approved for implementation planning
+**Status:** Superseded by the 2026-09-23 cloud gateway tier (embedded gateway key, no BYOK). Not implemented.
 **Amends:** `2026-04-18-talknative-design.md`
 
 ## Summary

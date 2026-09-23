@@ -1,0 +1,7 @@
+// Cloud-tier gateway. The key lives in the gitignored Secrets.xcconfig;
+// without it the app builds on-device only. `/$()/` stops xcconfig reading `//` as a comment.
+TN_GATEWAY_URL = https:/$()/gateway.nextgensoft.co
+TN_GATEWAY_KEY =
+TN_GATEWAY_MODEL = claude-haiku-4-5
+
+#include? "Secrets.xcconfig"

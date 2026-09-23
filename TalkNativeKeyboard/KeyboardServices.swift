@@ -18,11 +18,14 @@ struct KeyboardServices {
     let provider: any LanguageModelProvider
 
     static func make(hasFullAccess: Bool) -> KeyboardServices {
-        let provider = FoundationModelsProvider()
+        let config = GatewayConfig.fromBundle()
 
         guard hasFullAccess else {
             let presets = PresetStore(defaults: .standard)
             presets.seedIfNeeded()
+            // No Full Access: no App Group (so no consent flag) and no network.
+            let provider = ProviderSelector.make(
+                onDevice: FoundationModelsProvider(), consentGiven: false, canReachNetwork: false, config: config)
             return KeyboardServices(presets: presets, history: nil, provider: provider)
         }
 
@@ -30,6 +33,12 @@ struct KeyboardServices {
         let defaults = UserDefaults(suiteName: appGroupID) ?? .standard
         let presets = PresetStore(defaults: defaults)
         presets.seedIfNeeded()
+        let provider = ProviderSelector.make(
+            onDevice: FoundationModelsProvider(),
+            consentGiven: defaults.bool(forKey: ProviderSelector.consentKey),
+            canReachNetwork: true,
+            config: config
+        )
 
         let containerURL = FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: appGroupID)

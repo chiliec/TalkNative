@@ -1,5 +1,7 @@
 # Cloud Fallback Tier Implementation Plan
 
+**Status:** Superseded by the 2026-09-23 cloud gateway tier (embedded gateway key, no BYOK). Not implemented.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Add a BYOK Anthropic Claude Haiku 4.5 cloud tier, selected at boot on devices Apple excludes from Apple Intelligence (A15/A16 iPhones, non-Pro iPhone 15, older iPads), while leaving the on-device Foundation Models tier untouched on capable hardware.

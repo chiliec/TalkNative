@@ -6,6 +6,7 @@ struct SettingsTab: View {
     @State private var confirmClear = false
 
     var body: some View {
+        @Bindable var services = services
         NavigationStack {
             List {
                 Section("Presets") {
@@ -15,6 +16,14 @@ struct SettingsTab: View {
                 Section("History") {
                     Button("Clear history", role: .destructive) { confirmClear = true }
                         .disabled(services.historyStore.allMostRecentFirst().isEmpty)
+                }
+                if services.isCloudTier {
+                    Section {
+                        Toggle("Cloud mode", isOn: $services.cloudConsent)
+                            .accessibilityIdentifier("cloud.consent.toggle")
+                    } footer: {
+                        Text("Sends the text you enhance to the TalkNative gateway (Anthropic Claude).")
+                    }
                 }
                 Section("About") {
                     NavigationLink("About TalkNative") { AboutView() }

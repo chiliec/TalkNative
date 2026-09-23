@@ -52,6 +52,7 @@ struct UnsupportedDeviceView: View {
         case .deviceNotEligible: return "exclamationmark.iphone"
         case .appleIntelligenceNotEnabled: return "gearshape"
         case .modelNotReady: return "icloud.and.arrow.down"
+        case .cloudConsentRequired, .fullAccessRequired: return "icloud"
         case .other: return "exclamationmark.circle"
         }
     }
@@ -61,6 +62,7 @@ struct UnsupportedDeviceView: View {
         case .deviceNotEligible: return "This device doesn't support Apple Intelligence"
         case .appleIntelligenceNotEnabled: return "Apple Intelligence is off"
         case .modelNotReady: return "Apple Intelligence is downloading"
+        case .cloudConsentRequired, .fullAccessRequired: return "Cloud mode is off"
         case .other: return "Couldn't start TalkNative"
         }
     }
@@ -73,6 +75,8 @@ struct UnsupportedDeviceView: View {
             return "TalkNative needs it turned on:"
         case .modelNotReady:
             return "Come back in a few minutes. To check progress:"
+        case .cloudConsentRequired, .fullAccessRequired:
+            return EnhancerError.modelUnavailable(reason).userFacingMessage
         case .other(let s):
             return s
         }
@@ -95,7 +99,7 @@ struct UnsupportedDeviceView: View {
                 "Tap ‹ Settings to go back",
                 "Apple Intelligence & Siri",
             ]
-        case .deviceNotEligible, .other:
+        case .deviceNotEligible, .cloudConsentRequired, .fullAccessRequired, .other:
             return []
         }
     }
@@ -105,7 +109,7 @@ struct UnsupportedDeviceView: View {
     private var actionLabel: String? {
         switch reason {
         case .appleIntelligenceNotEnabled, .modelNotReady: return "Open Settings"
-        case .deviceNotEligible, .other: return nil
+        case .deviceNotEligible, .cloudConsentRequired, .fullAccessRequired, .other: return nil
         }
     }
 }
