@@ -146,6 +146,36 @@ struct GatewayProviderTests {
         #expect(result.error == .cancelled)
     }
 
+    /// Exercises `continuation.onTermination = { _ in task.cancel() }`: cancelling the
+    /// *consuming* Task mid-stream must tear down the in-flight request without hanging
+    /// or crashing, which is how `Enhancer` stops a generation early.
+    @Test func cancellingConsumerTaskStopsStreamWithoutHanging() async {
+        let provider = makeProvider()
+        let (signal, signalContinuation) = AsyncStream<Void>.makeStream()
+        let task = Task<String, Never> {
+            var text = ""
+            do {
+                for try await delta in provider.stream(instructions: "SYS", prompt: "hey") {
+                    text += delta
+                    signalContinuation.yield(())
+                }
+            } catch {
+                // Cancellation (or any other error) still leaves us with whatever was
+                // collected before it happened; that's all this test needs.
+            }
+            return text
+        }
+
+        // Wait until at least one delta has been delivered before cancelling, so the
+        // cancellation actually lands mid-stream rather than after it already finished.
+        var iterator = signal.makeAsyncIterator()
+        _ = await iterator.next()
+        task.cancel()
+
+        let text = await task.value  // must not hang
+        #expect(!text.isEmpty)
+    }
+
     @Test func streamWithoutMessageStopIsInterrupted() async {
         let body = """
             data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hel"}}
