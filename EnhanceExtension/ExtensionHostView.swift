@@ -16,6 +16,7 @@ struct ExtensionHostView: View {
 
     @State private var services: ExtensionServices = .make()
     @State private var viewModel: EnhancementViewModel?
+    @State private var unavailableMessage: String?
 
     var body: some View {
         Group {
@@ -33,6 +34,13 @@ struct ExtensionHostView: View {
                     onDismiss: onDismiss
                 )
                 .task { await recordOnCompletion(vm: vm) }
+            } else if let unavailableMessage {
+                VStack(spacing: 16) {
+                    Text(unavailableMessage).multilineTextAlignment(.center)
+                    Button("Done", action: onDismiss).buttonStyle(.borderedProminent)
+                }
+                .padding(32)
+                .accessibilityIdentifier("extension.unavailable")
             } else {
                 ProgressView().task { await begin() }
             }
@@ -45,8 +53,8 @@ struct ExtensionHostView: View {
             let vm = EnhancementViewModel(enhancer: services.enhancer)
             viewModel = vm
             await vm.start(inputText: initialText, activePresets: services.presets.activePresets)
-        case .unavailable:
-            onDismiss()
+        case .unavailable(let reason):
+            unavailableMessage = EnhancerError.modelUnavailable(reason).userFacingMessage
         }
     }
 
@@ -84,7 +92,12 @@ struct ExtensionServices {
             ?? (try! HistorySchema.makeContainer(appGroupURL: nil))
         let history = HistoryStore(container: container)
 
-        let provider = FoundationModelsProvider()
+        let provider = ProviderSelector.make(
+            onDevice: FoundationModelsProvider(),
+            consentGiven: defaults.bool(forKey: ProviderSelector.consentKey),
+            canReachNetwork: true,
+            config: GatewayConfig.fromBundle()
+        )
         return ExtensionServices(
             presets: presets,
             history: history,

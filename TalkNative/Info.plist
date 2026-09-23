@@ -18,6 +18,12 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>TNGatewayKey</key>
+	<string>$(TN_GATEWAY_KEY)</string>
+	<key>TNGatewayModel</key>
+	<string>$(TN_GATEWAY_MODEL)</string>
+	<key>TNGatewayURL</key>
+	<string>$(TN_GATEWAY_URL)</string>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UISupportedInterfaceOrientations</key>

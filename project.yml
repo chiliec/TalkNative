@@ -25,12 +25,18 @@ targets:
     platform: iOS
     deploymentTarget: "26.0"
     sources: [TalkNative]
+    configFiles:
+      Debug: Config/Gateway.xcconfig
+      Release: Config/Gateway.xcconfig
     info:
       path: TalkNative/Info.plist
       properties:
         UILaunchScreen: {}
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
+        TNGatewayURL: $(TN_GATEWAY_URL)
+        TNGatewayKey: $(TN_GATEWAY_KEY)
+        TNGatewayModel: $(TN_GATEWAY_MODEL)
     entitlements:
       path: TalkNative/TalkNative.entitlements
       properties:
@@ -57,6 +63,9 @@ targets:
     platform: iOS
     deploymentTarget: "26.0"
     sources: [EnhanceExtension]
+    configFiles:
+      Debug: Config/Gateway.xcconfig
+      Release: Config/Gateway.xcconfig
     info:
       path: EnhanceExtension/Info.plist
       properties:
@@ -67,6 +76,9 @@ targets:
           NSExtensionAttributes:
             NSExtensionActivationRule:
               NSExtensionActivationSupportsText: true
+        TNGatewayURL: $(TN_GATEWAY_URL)
+        TNGatewayKey: $(TN_GATEWAY_KEY)
+        TNGatewayModel: $(TN_GATEWAY_MODEL)
     entitlements:
       path: EnhanceExtension/EnhanceExtension.entitlements
       properties:
@@ -104,6 +116,9 @@ targets:
     platform: iOS
     deploymentTarget: "26.0"
     sources: [TalkNativeKeyboard]
+    configFiles:
+      Debug: Config/Gateway.xcconfig
+      Release: Config/Gateway.xcconfig
     info:
       path: TalkNativeKeyboard/Info.plist
       properties:
@@ -116,6 +131,9 @@ targets:
             PrefersRightToLeft: false
             PrimaryLanguage: en-US
             RequestsOpenAccess: true
+        TNGatewayURL: $(TN_GATEWAY_URL)
+        TNGatewayKey: $(TN_GATEWAY_KEY)
+        TNGatewayModel: $(TN_GATEWAY_MODEL)
     entitlements:
       path: TalkNativeKeyboard/TalkNativeKeyboard.entitlements
       properties:

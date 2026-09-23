@@ -35,5 +35,11 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).ShareViewController</string>
 	</dict>
+	<key>TNGatewayKey</key>
+	<string>$(TN_GATEWAY_KEY)</string>
+	<key>TNGatewayModel</key>
+	<string>$(TN_GATEWAY_MODEL)</string>
+	<key>TNGatewayURL</key>
+	<string>$(TN_GATEWAY_URL)</string>
 </dict>
 </plist>
