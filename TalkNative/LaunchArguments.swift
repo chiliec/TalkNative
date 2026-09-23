@@ -3,11 +3,18 @@ import Foundation
 enum LaunchArguments {
     static let useStubEnhancerFlag = "-useStubEnhancer"
     static let showKeyboardPanelFlag = "-showKeyboardPanel"
+    static let simulateIneligibleDeviceFlag = "-simulateIneligibleDevice"
     static let prefillInputEnvKey = "TALKNATIVE_PREFILL_INPUT"
     static let keyboardScenarioEnvKey = "TALKNATIVE_KEYBOARD_SCENARIO"
 
     static var useStubEnhancer: Bool {
         CommandLine.arguments.contains(useStubEnhancerFlag)
+    }
+
+    /// With `-useStubEnhancer`: behave like an iPhone without Apple
+    /// Intelligence so the cloud consent flow is reachable without a network.
+    static var simulateIneligibleDevice: Bool {
+        CommandLine.arguments.contains(simulateIneligibleDeviceFlag)
     }
 
     static var showKeyboardPanel: Bool {

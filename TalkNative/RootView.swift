@@ -6,17 +6,25 @@ import TextReplacement
 
 struct RootView: View {
     @Environment(AppServices.self) private var services
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        if LaunchArguments.showKeyboardPanel {
-            keyboardPanelHarness
-        } else {
-            switch services.provider.availability {
-            case .available:
-                MainTabs()
-            case .unavailable(let reason):
-                UnsupportedDeviceView(reason: reason)
+        Group {
+            if LaunchArguments.showKeyboardPanel {
+                keyboardPanelHarness
+            } else {
+                switch services.provider.availability {
+                case .available:
+                    MainTabs()
+                case .unavailable(.cloudConsentRequired):
+                    CloudConsentView()
+                case .unavailable(let reason):
+                    UnsupportedDeviceView(reason: reason)
+                }
             }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { services.refreshProvider() }
         }
     }
 
