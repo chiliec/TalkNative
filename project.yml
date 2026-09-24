@@ -11,6 +11,7 @@ settings:
     SWIFT_VERSION: 6.0
     CODE_SIGN_STYLE: Automatic
     DEVELOPMENT_TEAM: 7JF6XQC536
+    CURRENT_PROJECT_VERSION: 2
 
 schemes:
   TalkNative:
