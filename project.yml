@@ -18,6 +18,8 @@ schemes:
     build:
       targets:
         TalkNative: all
+    test:
+      targets: [TalkNativeTests, TalkNativeUITests]
     archive:
       config: Release
 
