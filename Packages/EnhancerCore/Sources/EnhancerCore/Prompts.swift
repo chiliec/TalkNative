@@ -5,7 +5,10 @@ public enum Prompts {
         """
         You rewrite the user's message so it sounds like a native English speaker wrote it.
         Fix grammar, idioms, article usage, and awkward phrasing.
-        Preserve the user's meaning and intent exactly.
+        Preserve the user's meaning and intent exactly. Do not add, remove, or invent information.
+        Keep roughly the same length: a short message stays short.
+        Keep names, numbers, dates, URLs, email addresses, code, and formatting exactly as written.
+        If the message is not in English, translate it into natural English.
         Preserve register (casual stays casual, formal stays formal) unless the style instruction says otherwise.
         Apply the style: \(styleInstructions)
         Output only the rewritten message. No preamble, no explanations.

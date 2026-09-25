@@ -15,6 +15,14 @@ struct PromptsTests {
         #expect(sys.contains("No preamble"))
     }
 
+    @Test func systemInstructionsGuardContentAndLength() {
+        let sys = Prompts.systemInstructions(styleInstructions: "x")
+        #expect(sys.contains("Do not add, remove, or invent information"))
+        #expect(sys.contains("a short message stays short"))
+        #expect(sys.contains("URLs, email addresses, code"))
+        #expect(sys.contains("translate it into natural English"))
+    }
+
     @Test func userPromptWrapsOriginal() {
         let p = Prompts.userPrompt(original: "hey thx")
         #expect(p == "Original: hey thx")

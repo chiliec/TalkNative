@@ -10,6 +10,16 @@ settings:
   base:
     SWIFT_VERSION: 6.0
     CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: 7JF6XQC536
+    CURRENT_PROJECT_VERSION: 2
+
+schemes:
+  TalkNative:
+    build:
+      targets:
+        TalkNative: all
+    archive:
+      config: Release
 
 packages:
   EnhancerCore: { path: Packages/EnhancerCore }
@@ -56,7 +66,7 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.axveer.talknative
-        TARGETED_DEVICE_FAMILY: "1,2"
+        TARGETED_DEVICE_FAMILY: "1"
 
   EnhanceExtension:
     type: app-extension

@@ -5,7 +5,16 @@ import Foundation
 
 public struct FoundationModelsProvider: LanguageModelProvider {
 
-    public init() {}
+    public init() { _ = Self.prewarmed }
+
+    /// Loads model assets once per process so the first generation doesn't pay the cold-start cost.
+    private static let prewarmed: Void = {
+        #if canImport(FoundationModels)
+            if case .available = SystemLanguageModel.default.availability {
+                LanguageModelSession(model: .default).prewarm()
+            }
+        #endif
+    }()
 
     public var availability: LanguageModelAvailability {
         #if canImport(FoundationModels)
