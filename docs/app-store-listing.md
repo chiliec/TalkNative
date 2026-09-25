@@ -91,12 +91,23 @@ To test the Share extension: select text in Notes, tap Share, choose TalkNative.
 
 ## Screenshots
 
-6.9-inch (iPhone 17 Pro Max) and 6.7-inch sets are required. Suggested shots, in order:
+Captured 6.9-inch shots live in `docs/screenshots/6.9/` (1320x2868, iPhone 17 Pro Max). Regenerate with:
 
-1. Enhance tab with three streamed variants for a short, obviously non-native message.
-2. Keyboard panel open in Messages with the rewrite applied and the undo strip visible.
-3. Share sheet from Notes landing in the result sheet.
-4. Presets screen showing built-ins and one custom preset.
-5. Privacy screen.
+```sh
+SIM=<udid of "iPhone 17 Pro Max (screenshots)">
+xcrun simctl status_bar $SIM override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
+TEST_RUNNER_SCREENSHOT_DIR=/tmp/tn-shots xcodebuild test -project TalkNative.xcodeproj -scheme TalkNative \
+  -destination "id=$SIM" -only-testing:TalkNativeUITests/ScreenshotTests CODE_SIGNING_ALLOWED=NO
+```
 
-Generate with the stub provider on the simulator: launch with `-useStubEnhancer` and `TALKNATIVE_PREFILL_INPUT` set to the sample text.
+`ScreenshotTests` skips itself unless `SCREENSHOT_DIR` is set, so CI never runs it. The stub answers each preset via `TALKNATIVE_STUB_RESPONSES`.
+
+Upload order:
+
+1. `02-enhance-results` — three rewrites of a non-native message.
+2. `06-presets` — active preset picker.
+3. `01-enhance-input` — the Enhance tab.
+4. `07-privacy` — privacy screen.
+5. `05-settings` — settings.
+
+Still needed from a real device: the keyboard panel inside Messages with the undo strip (the harness shots `03`/`04` render the panel full-screen and are not usable), and the Share sheet from Notes.

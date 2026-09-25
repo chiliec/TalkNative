@@ -100,9 +100,11 @@ extension AppServices {
         // Mirrors ProviderSelector's consent rows without a real GatewayProvider,
         // so UI tests never touch the network.
         let resolve: ProviderResolver = { consent in
-            StubLanguageModelProvider(
+            var stub = StubLanguageModelProvider(
                 availability: ineligible && !consent ? .unavailable(.cloudConsentRequired) : .available,
                 scriptedChunks: ["Hi ", "there"])
+            stub.responsesByInstruction = LaunchArguments.stubResponses(for: presetStore.activePresets)
+            return stub
         }
         return make(
             presetStore: presetStore, historyStore: historyStore, defaults: defaults, isCloudTier: ineligible,
