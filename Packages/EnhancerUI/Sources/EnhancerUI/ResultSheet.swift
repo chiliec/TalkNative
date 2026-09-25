@@ -31,10 +31,14 @@ public struct ResultSheet: View {
                     Text(viewModel.inputText).padding(10)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(.quaternary.opacity(0.3), in: RoundedRectangle(cornerRadius: 10))
+                        .accessibilityLabel("Your text: \(viewModel.inputText)")
+                    Text("Changed words are highlighted.")
+                        .font(.caption).foregroundStyle(.secondary)
 
                     ForEach(viewModel.variantStates) { state in
                         VariantCard(
                             state: state,
+                            original: viewModel.inputText,
                             actionKind: variantAction,
                             onPrimary: { onCopy(state.text) },
                             onRegenerate: {
