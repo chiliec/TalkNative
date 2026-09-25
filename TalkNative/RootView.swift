@@ -33,14 +33,14 @@ struct RootView: View {
     /// scenario selects the panel's starting state — see `KeyboardHarnessScenario`.
     private var keyboardPanelHarness: some View {
         let scenario = KeyboardHarnessScenario(LaunchArguments.keyboardScenario)
+        var stub = StubLanguageModelProvider(
+            availability: scenario.availability,
+            scriptedChunks: ["I went to the store and bought some milk."])
+        stub.responsesByInstruction = LaunchArguments.stubResponses(for: services.presetStore.activePresets)
         return KeyboardPanel(
             viewModel: KeyboardPanelViewModel(
                 proxy: scenario.makeProxy(),
-                enhancement: EnhancementViewModel(
-                    enhancer: Enhancer(
-                        provider: StubLanguageModelProvider(
-                            availability: scenario.availability,
-                            scriptedChunks: ["I went to the store and bought some milk."]))),
+                enhancement: EnhancementViewModel(enhancer: Enhancer(provider: stub)),
                 availability: { scenario.availability },
                 activePresets: services.presetStore.activePresets,
                 hasFullAccess: scenario.hasFullAccess

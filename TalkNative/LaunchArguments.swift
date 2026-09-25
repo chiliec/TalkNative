@@ -1,4 +1,5 @@
 import Foundation
+import PresetKit
 
 enum LaunchArguments {
     static let useStubEnhancerFlag = "-useStubEnhancer"
@@ -6,6 +7,7 @@ enum LaunchArguments {
     static let simulateIneligibleDeviceFlag = "-simulateIneligibleDevice"
     static let prefillInputEnvKey = "TALKNATIVE_PREFILL_INPUT"
     static let keyboardScenarioEnvKey = "TALKNATIVE_KEYBOARD_SCENARIO"
+    static let stubResponsesEnvKey = "TALKNATIVE_STUB_RESPONSES"
 
     static var useStubEnhancer: Bool {
         CommandLine.arguments.contains(useStubEnhancerFlag)
@@ -23,6 +25,14 @@ enum LaunchArguments {
 
     static var prefilledInput: String? {
         ProcessInfo.processInfo.environment[prefillInputEnvKey]
+    }
+
+    /// With `-useStubEnhancer` or `-showKeyboardPanel`: `|`-separated texts the
+    /// stub returns for the active presets, in order. Used for screenshots.
+    static func stubResponses(for presets: [Preset]) -> [String: [String]] {
+        guard let raw = ProcessInfo.processInfo.environment[stubResponsesEnvKey] else { return [:] }
+        let texts = raw.components(separatedBy: "|")
+        return Dictionary(uniqueKeysWithValues: zip(presets.map(\.instructions), texts.map { [$0] }))
     }
 
     /// Selects which state the `-showKeyboardPanel` harness starts in, so

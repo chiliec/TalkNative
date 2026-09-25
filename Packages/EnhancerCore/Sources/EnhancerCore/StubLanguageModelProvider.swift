@@ -5,6 +5,9 @@ public struct StubLanguageModelProvider: LanguageModelProvider {
     public var scriptedChunks: [String]
     public var scriptedError: Error?
     public var chunkDelay: Duration
+    /// Chunks to stream when `instructions` contains the key (e.g. a preset's
+    /// instruction text), so one stub can answer each preset differently.
+    public var responsesByInstruction: [String: [String]] = [:]
 
     public init(
         availability: LanguageModelAvailability = .available,
@@ -22,7 +25,7 @@ public struct StubLanguageModelProvider: LanguageModelProvider {
         instructions: String,
         prompt: String
     ) -> AsyncThrowingStream<String, Error> {
-        let chunks = scriptedChunks
+        let chunks = responsesByInstruction.first { instructions.contains($0.key) }?.value ?? scriptedChunks
         let error = scriptedError
         let delay = chunkDelay
         return AsyncThrowingStream { continuation in
