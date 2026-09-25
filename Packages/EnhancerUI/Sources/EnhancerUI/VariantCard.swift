@@ -30,7 +30,6 @@ public struct VariantCard: View {
             Text(state.presetLabel.uppercased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-                .accessibilityLabel("\(state.presetLabel) rewrite")
 
             switch state.phase {
             case .waiting:
